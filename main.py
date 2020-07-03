@@ -10,6 +10,7 @@ bluestackimg= CapBlueStack.CapBlueStack()
 
 
 nt= Notice()
+nt.print_notice()
 img= bluestackimg.select_bluestack(0)
 bluestackimg.printBS();
 
