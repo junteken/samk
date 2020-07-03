@@ -11,5 +11,7 @@ bluestackimg= CapBlueStack.CapBlueStack()
 
 nt= Notice()
 img= bluestackimg.select_bluestack(0)
-commons.gcv.detect_text(img)
+bluestackimg.printBS();
+
+#commons.gcv.detect_text(img)
 #text = pytesseract.image_to_string(img,lang='Hangul+eng')

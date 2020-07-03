@@ -12,6 +12,10 @@ class CapBlueStack(object):
         self.bslist=[(hwnd, title) for hwnd, title in self.winlist if 'bluestacks' in title.lower()]
         print("검출된 bluestack 갯수는 "+ str(len(self.bslist)))
 
+    def printBS(self):
+        for b in self.bslist:
+            print("bs="+ b[1])
+
 
 
     def get_window_rect(self, idx):

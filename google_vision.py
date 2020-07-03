@@ -1,5 +1,3 @@
-# API KEY= AIzaSyDYlo8D1iXnRfkersRQCszm_PnwmGcBf7w
-
 import os
 import io
 
