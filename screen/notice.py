@@ -8,12 +8,10 @@ class Notice(FeatureBase):
 
     def __init__(self):
         
-        self.ref_image_name = "./state_img/공지.jpg"
-        self.sample_text_file = "./state_img/공지.txt"
+        self.ref_image_name = "./rsrc/state_img/공지.jpg"
+        self.sample_text_file = "./rsrc/state_img/공지.txt"
 
-        print(os.getcwd())
-
-
+        #print(os.getcwd())
 
         if not os.path.isfile(self.sample_text_file):
             print("파일 " + self.sample_text_file + " 이 존재하지 않습니다. 생성합니다.")

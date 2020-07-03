@@ -3,10 +3,6 @@ import io
 
 class google_vision(object):
 
-    def __init__(self):
-        self.api_key= "AIzaSyDYlo8D1iXnRfkersRQCszm_PnwmGcBf7w"
-        #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.json_credential
-
     def detect_text(self, content):
         from google.cloud import vision
         client = vision.ImageAnnotatorClient()
