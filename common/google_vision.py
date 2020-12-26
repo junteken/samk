@@ -38,6 +38,8 @@ class google_vision(object):
         image = vision.types.Image(content=imageio)
         response = client.text_detection(image=image)
         texts = response.text_annotations
+        
+        return texts
 
 
 

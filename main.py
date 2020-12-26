@@ -1,18 +1,34 @@
 import pyautogui
-import CapBlueStack
-from screen.notice import Notice
-import commons
+from common import commons, bsmultimanager
+
+import time
+
 #from pytesseract import *
-import cv2
+#screenWidth, screenHeight = pyautogui.size()
 
-screenWidth, screenHeight = pyautogui.size()
-bluestackimg= CapBlueStack.CapBlueStack()
+bsm= bsmultimanager.BsMultiManager()
+bsm.do_restart()
 
 
-nt= Notice()
-nt.print_notice()
-img= bluestackimg.select_bluestack(0)
-bluestackimg.printBS();
+    #bluestackimg.printBS();
+
+
+
+# for i in found_list:
+#     print("검색된 단어의 위치="+str(found_list))
+#     pyautogui.moveTo(bbox[0] + found_list[0][0][0][0], bbox[1] + found_list[0][0][0][1])
+#
+
+
 
 #commons.gcv.detect_text(img)
 #text = pytesseract.image_to_string(img,lang='Hangul+eng')
+
+
+
+#
+# while(True):
+#     print('x,y = '+ str(pyautogui.position()))
+#
+#     time.sleep(0.1)
+

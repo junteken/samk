@@ -3,6 +3,10 @@ from ctypes import windll, wintypes, byref, sizeof
 from PIL import ImageGrab
 import win32gui
 
+'''
+window api를 이용해 bluestack process정보를 기반으로 window정보를 가져오는 역할 수행
+'''
+
 class CapBlueStack(object):
 
     def __init__(self):
@@ -39,9 +43,14 @@ class CapBlueStack(object):
     def enum_cb(self, hwnd, results):
         self.winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
 
-    def select_bluestack(self, idx):
-        win32gui.SetForegroundWindow(self.bslist[idx][0])
+    def select_bluestack(self, idx, debug=False):
+        try:
+            win32gui.SetForegroundWindow(self.bslist[idx][0])
+        except:
+            print('win32gui.SetForegroundWindow exception occured!!!')
+
         bbox = self.get_window_rect(idx)
         img = ImageGrab.grab(bbox)
-        img.show()
-        return img
+        if(debug):
+            img.show()
+        return bbox, img
