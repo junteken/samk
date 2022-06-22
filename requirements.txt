@@ -8,7 +8,7 @@ googleapis-common-protos==1.52.0
 grpcio==1.29.0
 idna==2.9
 MouseInfo==0.1.2
-numpy==1.18.5
+numpy==1.22.0
 opencv-contrib-python==4.2.0.34
 Pillow==7.1.1
 protobuf==3.12.2
