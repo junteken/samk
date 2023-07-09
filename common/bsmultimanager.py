@@ -42,7 +42,8 @@ class BsMultiManager(object):
         pyautogui.press('space', interval= 1)
 
 
-    def check_screen(self):
+    # 현재 화면의 screen을 캡처하고 ocr결과를 돌려준다.
+    def get_screen_ocr(self):
         bbox, img = self.get_CurrentBsImg()
         ocr_result = commons.scan(img)
 
@@ -55,21 +56,21 @@ class BsMultiManager(object):
         return bbox, ocr_result
 
     def is_notice(self):
-        bbox, ocr_result= self.check_screen()
+        bbox, ocr_result= self.get_screen_ocr()
         found = commons.search_word(ocr_result, '공지')
         found = commons.search_word(ocr_result, '확인')
         pyautogui.click(bbox[0] + found[0][0][0][0], bbox[1] + found[0][0][0][1])
 
 
     def do_executeSamK(self):
-        bbox, ocr_result= self.check_screen()
+        bbox, ocr_result= self.get_screen_ocr()
         found=commons.search_word(ocr_result, '삼국지K')
         pyautogui.click(bbox[0] + (found[0][0][0][0]+found[0][0][1][0])/2, bbox[1] + (found[0][0][0][1]+found[0][0][2][1])/2)
 
 
     #현재 게임 화면이 "게임을 종료하시겠습니까?"
     def is_GameQuit(self):
-        bbox, ocr_result= self.check_screen()
+        bbox, ocr_result= self.get_screen_ocr()
         found= commons.search_word(ocr_result, '게임을 나가시겠습니까', True)
         found= commons.search_word(ocr_result, '확인')
         if len(found) > 0:
