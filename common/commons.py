@@ -16,6 +16,7 @@ accountList={
     "정련" : "",
 }
 
+window_name = 'romancek'
 
 def scan(bsimage):
     img_byte = io.BytesIO()

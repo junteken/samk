@@ -47,6 +47,12 @@ class BsMultiManager(object):
         ocr_result = commons.scan(img)
 
         return bbox, ocr_result
+    
+    def test_img(self):
+        
+        ocr_result = commons.scan(img)
+
+        return bbox, ocr_result
 
     def is_notice(self):
         bbox, ocr_result= self.check_screen()
@@ -61,15 +67,13 @@ class BsMultiManager(object):
         pyautogui.click(bbox[0] + (found[0][0][0][0]+found[0][0][1][0])/2, bbox[1] + (found[0][0][0][1]+found[0][0][2][1])/2)
 
 
-
-
-
     #현재 게임 화면이 "게임을 종료하시겠습니까?"
     def is_GameQuit(self):
         bbox, ocr_result= self.check_screen()
         found= commons.search_word(ocr_result, '게임을 나가시겠습니까', True)
         found= commons.search_word(ocr_result, '확인')
-        pyautogui.click(bbox[0] + found[1][0][0][0], bbox[1] + found[1][0][0][1])
+        if len(found) > 0:
+            pyautogui.click(bbox[0] + found[1][0][0][0], bbox[1] + found[1][0][0][1])
 
 
 

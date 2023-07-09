@@ -1,7 +1,11 @@
+import sys
+sys.path.append('common')
+
 from ctypes import windll, wintypes, byref, sizeof
 
 from PIL import ImageGrab
 import win32gui
+from common import commons
 
 '''
 window api를 이용해 bluestack process정보를 기반으로 window정보를 가져오는 역할 수행
@@ -9,12 +13,14 @@ window api를 이용해 bluestack process정보를 기반으로 window정보를 
 
 class CapBlueStack(object):
 
+
+
     def __init__(self):
         self.winlist=[]
         self.toplist=[]
         win32gui.EnumWindows(self.enum_cb, self.toplist)
-        self.bslist=[(hwnd, title) for hwnd, title in self.winlist if 'bluestacks' in title.lower()]
-        print("검출된 bluestack 갯수는 "+ str(len(self.bslist)))
+        self.bslist=[(hwnd, title) for hwnd, title in self.winlist if commons.window_name in title.lower()]
+        print(f"검출된 {commons.window_name} 갯수는 + {len(self.bslist)})")
 
     def printBS(self):
         for b in self.bslist:
