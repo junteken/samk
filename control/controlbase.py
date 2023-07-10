@@ -1,8 +1,11 @@
 from typing import Any
 from common import commons
+from invalidstateerror import InvalidStateError
+import time
 
 class ControlBase(object):
     def __init__(self):
+        # name은 gui의 list view의 item이름으로 사용된다.
         self.name = None
         self.start_screen_state = None
         
@@ -12,7 +15,7 @@ class ControlBase(object):
         if self.start_screen_state.check(img):
             return True
         else:
-            return False
+            raise InvalidStateError(self.state, self.start_screen_state)
 
 
 

@@ -48,12 +48,6 @@ class BsMultiManager(object):
         ocr_result = commons.scan(img)
 
         return bbox, ocr_result
-    
-    def test_img(self):
-        
-        ocr_result = commons.scan(img)
-
-        return bbox, ocr_result
 
     def is_notice(self):
         bbox, ocr_result= self.get_screen_ocr()

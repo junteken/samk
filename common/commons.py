@@ -49,8 +49,7 @@ def search_word(ocr_result, keyword, debug=False):
 
     return found
 
-def first_check():
-    
+def setup():
     # screen에 있는 모든 class들의 인스턴스를 생성하는 코드
     modules_folder_path = Path("screen")
     sys.path.insert(0, str(modules_folder_path.resolve()))
@@ -68,7 +67,13 @@ def first_check():
             if cls.__module__ == module.__name__:
                 state_instances.append(cls())
 
+    for obj in state_instances:
+        obj_name = obj.name
+        state_dict[obj_name] = obj
+
     print('모든 state class의 객체들 생성완료')
+
+def first_check():   
 
     for s in state_instances:
         if not s.check():
@@ -85,15 +90,7 @@ def first_check():
                 print(f'feature가 충돌 나는 state발견 {state_instances[i].name} 과 {state_instances[j].name}')
                 raise RuntimeError("state , feautre설정 오류")
 
-    
-    for obj in state_instances:
-        obj_name = obj.name
-        state_dict[obj_name] = obj
-
     print('검사완료')
-
-    return state_dict
-    
     # 여기까지
 
     # 생성된 state_instance들은 각자 자신의 feature text와 img ocr결과를 비교하고 다른 
@@ -102,7 +99,7 @@ def first_check():
 # 현재 화면의 state을 돌려주는 공용함수
 def get_current_state():
 
-    img = bsm.get_CurrentBsImg()
+    _, img = bsm.get_CurrentBsImg()
 
     for state in state_instances:
         if state.check(img):

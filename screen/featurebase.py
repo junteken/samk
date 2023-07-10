@@ -7,15 +7,16 @@ class FeatureBase(object):
     def __init__(self):
         self.name = None
         self.feature_texts = None 
-        self.img = None
+        self.img_file_path = None
 
     # feature_texts의 모든 문자들이 target_texts(ocr로 인식되어져 나온)이 존재하는지
     # 확인하는 함수
     def check(self, img = None):
+        #bs이미지가 들어오지 않으면 자체 file path의 image파일을 읽
         if img is None:
-            recog_dict = commons.g_reader.readtext(self.img)
+            recog_dict = commons.g_reader.readtext(self.img_file_path)
         else:
-            recog_dict = commons.g_reader.readtext(img)
+            recog_dict = commons.scan(img)
 
         recog_texts = [v[1] for _, v in enumerate(recog_dict)]
         target_texts = self.split_words(recog_texts)

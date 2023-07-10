@@ -6,10 +6,14 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
 
+state_dict  = commons.setup()
+
+# commons.first_check()
+
+import control_manager
 
 # bsm.do_restart()
 
-state_dict = commons.first_check()
 # 윈도우 생성
 root = tk.Tk()
 root.title("GUI Example")
@@ -24,13 +28,23 @@ right_frame.pack(side="right", padx=5, pady=10)
 bottom_frame = ttk.Frame(root)
 bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
+def get_selected_item_text(event=None):
+    item = list_view.item(list_view.focus()) # 선택된 항목의 아이디 가져오기
+    cur_item = item['text'] # 아이디를 사용해 항목의 텍스트 속성 가져오기
+    return cur_item    
+
 # 리스트뷰 생성
-list_view = ttk.Treeview(left_frame)
+list_view = ttk.Treeview(left_frame, selectmode='browse')
+list_view.bind('<<TreeviewSelect>>', get_selected_item_text)
 list_view.pack(fill="both", expand=True)
 
+
+
 # 여러 데이터 삽입
-# for i in range(5):
+# for i in len(control_manager.control_item):
 #     list_view.insert('', 'end', text="Item " + str(i))
+for item in control_manager.control_item:
+    list_view.insert('', 'end', text=item.name)
 
 
 # 이미지뷰 생성
@@ -59,13 +73,16 @@ bottom_frame = ttk.Frame(left_frame)
 bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
 def on_start_click():
-    print("Button clicked!")
+    selected_item = get_selected_item_text()
+    control_manager.control_dict[selected_item].execute(commons.bsm)
 
 def on_cancel_click():
     print("Button clicked!")
 
 def on_scan_click():
     ocr_text = commons.get_current_text()
+    bbox, img = commons.bsm.get_CurrentBsImg()
+    update_image(img)
     text_view.insert('end', ocr_text)
     text_view.insert('end', "'\n'")
 
@@ -76,7 +93,12 @@ def on_save_click():
     if file_name:
         img.save(file_name)
 
-
+def update_image(img):
+    global photo
+    # 이미지 업데이트    
+    new_photo = ImageTk.PhotoImage(img)
+    image_label.configure(image=new_photo)
+    photo = new_photo
 
 # 버튼 생성
 start_btn = ttk.Button(bottom_frame, text="시작", command=on_start_click)
