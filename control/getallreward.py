@@ -30,6 +30,7 @@ class GetAllReward(ControlBase):
         sv_list = self.getserverlist('hb')
 
         for sv in sv_list:
+            sv = '입초대길'
             self.current_server = sv
             # 초기상태는 타이틀화면 이다.                        
             touch_texts = ['서버클리', '시즌서버', 'HB']
@@ -50,8 +51,7 @@ class GetAllReward(ControlBase):
         #시작버튼을 누르면 여러가지 화면으로 바뀐다.
         cur_state = commons.get_current_state()
 
-        if cur_state.name == '국가선택':
-            # touch_texts = ['괜담가입', ]
+        if cur_state.name == '국가선택':            
             self.join_country('촉')
 
 
@@ -81,19 +81,6 @@ class GetAllReward(ControlBase):
         time.sleep(1)
         pyautogui.press('enter')
         commons.touch_on_text('게임시작')
-
-
-
-
-
-
-
-
-    
-
-
-        
-
 
     def getserverlist(self, filename):
         filepath = './rsrc/' + filename

@@ -111,6 +111,8 @@ def update_image(img):
     image_label.configure(image=new_photo)
     photo = new_photo
 
+commons.bsm.fn_update_imageview = update_image
+
 # 버튼 생성
 start_btn = ttk.Button(bottom_frame, text="시작", command=on_start_click)
 start_btn.pack(side="left", padx=5)

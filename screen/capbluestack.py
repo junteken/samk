@@ -13,8 +13,6 @@ window api를 이용해 bluestack process정보를 기반으로 window정보를 
 
 class CapBlueStack(object):
 
-
-
     def __init__(self):
         self.winlist=[]
         self.toplist=[]
