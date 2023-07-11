@@ -44,7 +44,7 @@ list_view.pack(fill="both", expand=True)
 # for i in len(control_manager.control_item):
 #     list_view.insert('', 'end', text="Item " + str(i))
 for item in control_manager.control_item:
-    list_view.insert('', 'end', text=item.name)
+    list_view.insert('', 'end', text=item.con_name)
 
 
 # 이미지뷰 생성
@@ -81,7 +81,8 @@ def on_start_click():
     global current_control_item
     selected_item = get_selected_item_text()
     current_control_item = control_manager.control_dict[selected_item]
-    current_control_item.start()
+
+    current_control_item().start()
 
 def on_cancel_click():
     if current_control_item is None:

@@ -16,11 +16,13 @@ from control.getallreward import GetAllReward
 #         # 모듈 import
 #         module = importlib.import_module(module_name)
 
+
 control_item=[
-    GetAllReward(),
+    GetAllReward,
 ]
 
 control_dict={}
 
 for con in control_item:
-    control_dict[con.name] = con
+    control_dict[con.con_name] = con
+

@@ -5,6 +5,7 @@ from ctypes import windll, wintypes, byref, sizeof
 
 from PIL import ImageGrab
 import win32gui
+import win32con
 from common import commons
 
 '''
@@ -24,8 +25,18 @@ class CapBlueStack(object):
         for b in self.bslist:
             print("bs="+ b[1])
 
+    def set_window_size_default(self, idx=0):
+        window_handle = win32gui.FindWindow(None, commons.window_name)
 
-
+        if window_handle == 0:
+            print(f"'{commons.window_name}' 애플리케이션을 찾을 수 없습니다.")
+            return
+        
+        rect = win32gui.GetWindowRect(window_handle)
+        x, y = rect[0], rect[1]
+        # 창 크기를 조정
+        win32gui.MoveWindow(window_handle, x, y, 1280, 720, True)
+        
     def get_window_rect(self, idx):
         """ 핸들에 대응하는 윈도우의 좌표정보를 반환한다
         param:

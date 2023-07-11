@@ -8,10 +8,11 @@ import time
 class GetAllReward(ControlBase):
 
     # [S 0O1] <-- 요렇게 인식됨
+    con_name = '모든 서버 보상 얻기'
 
     def __init__(self):
         super().__init__()
-        self.name='모든 서버 보상 얻기'
+        # self.name='모든 서버 보상 얻기'
         # 모든 제어는 최초 화면 상태를 맞추고 시작해야하므로 최초 화면의 상태를 
         self.start_screen_state = commons.state_dict['타이틀화면']
         self.serverlist = []
@@ -39,6 +40,7 @@ class GetAllReward(ControlBase):
                 time.sleep(1)
 
             commons.touch_on_text(sv)
+            time.sleep(1)
             self.receive_bokji()
             break        
 
@@ -57,6 +59,7 @@ class GetAllReward(ControlBase):
 
     # 나라가입은 ocr인식이 잘 되지 않아 상대좌표에 click하는 형태로 구현함
     def join_country(self, country_name):
+        print(f'{country_name} 나라의 가입을 시작합니다.')        
         country_list = {"한":(404, 222), "위":(638, 223), "마":(889, 214), '촉':(301, 434), '오':(538, 429), '원':(769, 423)}
 
         pyautogui.click(country_list[country_name][0], country_list[country_name][1])
