@@ -11,8 +11,7 @@ class BsMultiManager(object):
         self.sample_text_file = "./rsrc/state_img/블루스택매니저.txt"
         self.bs= capbluestack.CapBlueStack()
         self.current_bsIdx=0 #현재 bluestack instance number
-
-
+        self.image_view = None
 
     #idx에 해당하는 bluestack을 새로 시작하는 함수
     def do_restart(self, idx=0):
@@ -73,7 +72,10 @@ class BsMultiManager(object):
 
 
     def get_CurrentBsImg(self):
+        if self.image_view:
+            
         return self.bs.select_bluestack(self.current_bsIdx)
+        
 
     def get_CurrentBsXY(self):
         return self.bs.get_window_rect(self.current_bsIdx)

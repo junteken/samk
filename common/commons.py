@@ -25,7 +25,6 @@ state_instances = []
 state_dict = {}
 bsm= BsMultiManager()
 
-
 def scan(bsimage):
     img_byte = io.BytesIO()
     bsimage.save(img_byte, format='PNG')
