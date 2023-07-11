@@ -11,14 +11,11 @@ class FeatureBase(object):
 
     # feature_texts의 모든 문자들이 target_texts(ocr로 인식되어져 나온)이 존재하는지
     # 확인하는 함수
-    def check(self, img = None):
+    def check(self, recog_texts = None):
         #bs이미지가 들어오지 않으면 자체 file path의 image파일을 읽
-        if img is None:
+        if recog_texts is None:
             recog_dict = commons.g_reader.readtext(self.img_file_path)
-        else:
-            recog_dict = commons.scan(img)
-
-        recog_texts = [v[1] for _, v in enumerate(recog_dict)]
+            recog_texts = [v[1] for _, v in enumerate(recog_dict)]
         target_texts = self.split_words(recog_texts)
         
         return all(item in target_texts for item in self.feature_texts)

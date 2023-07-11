@@ -98,11 +98,9 @@ def first_check():
 
 # 현재 화면의 state을 돌려주는 공용함수
 def get_current_state():
-
-    _, img = bsm.get_CurrentBsImg()
-
+    texts = get_current_text()
     for state in state_instances:
-        if state.check(img):
+        if state.check(texts):
             return state
         
     raise RuntimeError("현재 화면의 대응되는 screen state가 정의되지 않았습니다.")

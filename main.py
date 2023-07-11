@@ -6,13 +6,13 @@ import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
 
-state_dict  = commons.setup()
-
+commons.setup()
 # commons.first_check()
 
 import control_manager
 
-# bsm.do_restart()
+# 전역변수 설정
+current_control_item = None
 
 # 윈도우 생성
 root = tk.Tk()
@@ -52,8 +52,13 @@ for item in control_manager.control_item:
 _, cur_img = commons.bsm.get_CurrentBsImg()
 photo = ImageTk.PhotoImage(cur_img)
 
+def mouse_click_event(event):
+    x, y = event.x, event.y
+    print(f"Relative coordinates: ({x}, {y})")
+
 image_label = ttk.Label(right_frame, image=photo)
 image_label.pack()
+image_label.bind('<Button-1>', mouse_click_event)
 
 # 텍스트뷰와 스크롤바를 위한 프레임 생성
 text_frame = ttk.Frame(left_frame)
@@ -73,11 +78,17 @@ bottom_frame = ttk.Frame(left_frame)
 bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
 def on_start_click():
+    global current_control_item
     selected_item = get_selected_item_text()
-    control_manager.control_dict[selected_item].execute(commons.bsm)
+    current_control_item = control_manager.control_dict[selected_item]
+    current_control_item.start()
 
 def on_cancel_click():
-    print("Button clicked!")
+    if current_control_item is None:
+        return
+    
+    current_control_item.stop()
+    current_control_item.join()
 
 def on_scan_click():
     ocr_text = commons.get_current_text()
