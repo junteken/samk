@@ -89,7 +89,7 @@ def on_start_click():
 def on_cancel_click():
     if current_control_item is None:
         return
-    
+    current_control_item.thread_control = False
     current_control_item.stop()
     current_control_item.join()
 

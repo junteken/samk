@@ -1,8 +1,7 @@
+from common import commons
 
-str1 = 'romancek12 5.4.100.1026 N32'
-str2 = '삼국지k'
+result = commons.g_reader.readtext('./rsrc/state_img/bluestack.png')
 
-if str2 in str1:
-    print('들어가있네')
-else:
-    print('없네')
+for item in result:
+    if '삼국지K' in item[1] :
+        print('삼국지k 찾음')

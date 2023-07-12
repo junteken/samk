@@ -34,6 +34,8 @@ class GetAllReward(ControlBase):
         sv_list = self.getserverlist('hb')
 
         for sv in sv_list:
+            if self.thread_control is False:
+                return
             # sv = '입초대길'
             self.current_server = sv
             # 초기상태는 타이틀화면 이다.                        
@@ -42,7 +44,9 @@ class GetAllReward(ControlBase):
                 commons.touch_on_text(t)
                 time.sleep(1)
 
-            commons.touch_on_text(sv)
+            # 서버가 없다면 scroll해야함
+            self.scroll_until_find_server(sv)
+            commons.touch_on_text(sv)                
             time.sleep(1)
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
@@ -70,15 +74,27 @@ class GetAllReward(ControlBase):
                 while(cur_state.name == '게임종료'):
                     pyautogui.press('enter')
                     time.sleep(2)
+                    cur_state = commons.get_current_state()
 
             cur_state = commons.get_current_state()
             if cur_state.name == '블루스택':
                 print('게임종료 확인')
-                # commons.touch_on_text('삼국지k')
-                pyautogui.click(1080, 176)
+                commons.touch_on_text('삼국지K')
+                # pyautogui.click(1080, 176)
                 time.sleep(10)
                 pyautogui.press('esc')
                 time.sleep(1)
+
+    def scroll_until_find_server(self, server_name):
+        while True :    
+            cur_server_list = commons.get_current_text()
+            for server in cur_server_list:
+                if server_name in server:
+                    return True
+            pyautogui.moveTo(730, 312)
+            pyautogui.scroll(-10)
+            time.sleep(3)
+            # 서버를 못찾으면 scroll해야함
 
     def receive_bokji(self):
         print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')
@@ -89,37 +105,57 @@ class GetAllReward(ControlBase):
         #시작버튼을 누르면 여러가지 화면으로 바뀐다.
         cur_state = commons.get_current_state()
 
-        if cur_state.name == '국가선택': 
+        if cur_state is None:
+            print('재돌입 후 이름설정화면')
+            self.naming(self.current_server+'빈즈')
+        
+        # naming state가 없는 이유는 title과 겹치기때문
+        # elif cur_state.name == '유저이름':
+        #     print('재돌입 후 이름설정화면')
+            # self.naming(self.current_server+'빈즈')
+        elif cur_state.name == '국가선택': 
             # 한번도 플레이한적이 없어서 나라부터 고르는 경우
             print('나라선택화면')
             self.join_country('촉')                        
         elif cur_state.name == '첫충전':
             print('첫충전 화면')
             pass 
-        else:
-            print('재돌입 후 이름설정화면')
-            self.naming(self.current_server+'빈즈')
 
         pyautogui.press('esc')
-        time.sleep(0.5)
+        time.sleep(2) # 첫충전화면을 끄면 기능오픈이 뜰수도 있으므로
 
         # 여기까지 오면 세계로 진입했는지 확인하면 된다.
         cur_state = commons.get_current_state()
-        if cur_state.name != '세상':
-            raise InvalidStateError(cur_state, commons.state_dict['세상'])
-        
-        commons.touch_on_img('bokji')
-        time.sleep(1)
-        cur_state = commons.get_current_state()
-        if cur_state.name != '보상':
-            print(f'{self.current_server} 서버의 복지는 없네요')
-            return False
-
-        while(cur_state.name == '보상'):
-            print('보상이 존재합니다.')
-            commons.touch_on_text('모두수령')
+        while(cur_state.name != '세상'):
+            # 세상이 아니라 기능오픈인경우 나간다
+            pyautogui.press('esc')
             time.sleep(1)
             cur_state = commons.get_current_state()
+        
+        success = commons.touch_on_img('bokji')        
+        if success:
+            cur_state = commons.get_current_state()
+            if cur_state is not None and cur_state.name != '보상':
+                success = False                
+
+            else:
+                while(success):
+                    time.sleep(1)
+                    print('보상이 존재합니다.')
+                    commons.touch_on_text('모두수령')
+                    # 모두수령의 경우 lv점핑이 들어있는경우 시간이 오래걸리므로
+                    time.sleep(10)
+                    cur_state = commons.get_current_state()
+                    if cur_state.name != '보상':
+                        success = False
+                    
+                    if cur_state.name == '레벨업':
+                        pyautogui.press('esc')
+                        time.sleep(1)
+
+        else:
+            print(f'{self.current_server} 서버의 복지는 없네요')
+            return False
 
         print(f'{self.current_server} 서버의 복지 수령완료')
         return True
@@ -157,7 +193,7 @@ class GetAllReward(ControlBase):
         time.sleep(1)
         pyautogui.press('enter')
         commons.touch_on_text('게임시작')
-        time.sleep(3)
+        time.sleep(10)
 
     def getserverlist(self, filename):
         filepath = './rsrc/' + filename

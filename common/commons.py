@@ -41,11 +41,12 @@ def scan(bsimage):
 # return : 찾은 단어의 ocr_result의 v값들을 리턴해주거나
 # 찾고자 하는 단어와 가장 유사한 v값을 리턴해준다.
 def search_word(ocr_result, keyword):    
-    # found = [v for _, v in enumerate(ocr_result) if keyword in v[1]]
-    found = []
-    for _, v in enumerate(ocr_result):
-        if keyword in v[1]:
-            found.append(v)
+    found = [v for _, v in enumerate(ocr_result) if keyword in v[1]]
+    # debugging용 풀어쓰기
+    # found = []
+    # for _, v in enumerate(ocr_result):
+    #     if keyword in v[1]:
+    #         found.append(v)
     if len(found) == 0:
         max = 0
         for _, v in enumerate(ocr_result):
@@ -109,7 +110,7 @@ def get_current_state():
         if state.check(texts):
             return state
         
-    raise RuntimeError("현재 화면의 대응되는 screen state가 정의되지 않았습니다.")
+    return None
 
 def get_current_text():
     bbox, img = bsm.get_CurrentBsImg()
@@ -161,7 +162,7 @@ def find_image_coord(large_image, small_image_path):
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
 
     # 임계값을 설정하고 매칭된 위치를 찾습니다 (역치에 맞는 경우).
-    threshold = 0.8
+    threshold = 0.7
     match_result = []
 
     if max_val > threshold:
@@ -177,8 +178,11 @@ def touch_on_img(target_img_name):
     coord = find_image_coord(img, tg_img_path)
     if len(coord) > 0:        
         pyautogui.click(coord[0])
+        time.sleep(1)
+        return True
     else:
         print(f'{target_img_name} 이미지를 현재 이미지에서 찾지 못했습니다.')
+        return False
 
 def print_log(log):
     if log_text_view:
