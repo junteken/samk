@@ -73,6 +73,8 @@ scrollbar.pack(side="right", fill="y")
 
 text_view.config(yscrollcommand=scrollbar.set)
 
+commons.log_text_view = text_view
+
 # 왼쪽 프레임의 하단에 버튼 추가
 bottom_frame = ttk.Frame(left_frame)
 bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")

@@ -6,6 +6,9 @@ from common.bsmultimanager import BsMultiManager
 from invalidstateerror import InvalidStateError
 import difflib
 import pyautogui
+import cv2
+import numpy as np
+import time
 
 g_reader = easyocr.Reader(['ko', 'en'], gpu=False)
 
@@ -24,24 +27,25 @@ window_name = 'romancek'
 state_instances = []
 state_dict = {}
 bsm= BsMultiManager()
+log_text_view = None
 
 def scan(bsimage):
     img_byte = io.BytesIO()
     bsimage.save(img_byte, format='PNG')
     img_byte = img_byte.getvalue()
-
     result = g_reader.readtext(img_byte, detail=1)
-
-    print(result)
 
     return result
 
 # 해당 keyword가 ocr_result에 존재하는지
 # return : 찾은 단어의 ocr_result의 v값들을 리턴해주거나
 # 찾고자 하는 단어와 가장 유사한 v값을 리턴해준다.
-def search_word(ocr_result, keyword):
-    found = [v for _, v in enumerate(ocr_result) if keyword in v[1]]
-
+def search_word(ocr_result, keyword):    
+    # found = [v for _, v in enumerate(ocr_result) if keyword in v[1]]
+    found = []
+    for _, v in enumerate(ocr_result):
+        if keyword in v[1]:
+            found.append(v)
     if len(found) == 0:
         max = 0
         for _, v in enumerate(ocr_result):
@@ -125,5 +129,58 @@ def touch_on_text(text):
     
     pyautogui.click(bbox[0] + found[0][0][0][0], bbox[1] + found[0][0][0][1])
     
+def press_on_text(text):
+    bbox, result = bsm.get_screen_ocr()
+    found = search_word(result, text)
+    if len(found) == 0:
+        print(f'{text} 단어를 찾지 못하였습니다.')
+        return False
+        
+    pyautogui.mouseDown(bbox[0] + found[0][0][0][0], bbox[1] + found[0][0][0][1])
+    time.sleep(0.5)
+    pyautogui.mouseUp(bbox[0] + found[0][0][0][0], bbox[1] + found[0][0][0][1])
     
-    
+# small_image_path는 윈도우에서 
+# 아래와 같은 형태로 변경해서 넣어줘야한다.
+# small_image_path = '.\\rsrc\\target_img\\bokji.png'
+def find_image_coord(large_image, small_image_path):
+    np_img = np.array(large_image)
+    large_image = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+    # 이미지 파일을 읽어옵니다.    
+    small_image_path = os.path.abspath(small_image_path)
+    small_image = cv2.imread(small_image_path, cv2.IMREAD_COLOR)
+
+    # 큰 이미지와 작은 이미지의 높이와 너비를 가져옵니다.
+    large_height, large_width = large_image.shape[:2]
+    small_height, small_width = small_image.shape[:2]
+
+    # 템플릿 매칭 메소드를 사용해 이미지를 매칭합니다.
+    result = cv2.matchTemplate(large_image, small_image, cv2.TM_CCOEFF_NORMED)
+
+    # 최소 스코어와 최대 스코어 및 그 위치를 찾습니다.
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+
+    # 임계값을 설정하고 매칭된 위치를 찾습니다 (역치에 맞는 경우).
+    threshold = 0.8
+    match_result = []
+
+    if max_val > threshold:
+        match_result.append(max_loc)
+
+    return match_result
+
+def touch_on_img(target_img_name):
+    _, img = bsm.get_CurrentBsImg()
+    tg_img_path = '.\\rsrc\\target_img\\' + target_img_name + '.png'
+    coord = None
+
+    coord = find_image_coord(img, tg_img_path)
+    if len(coord) > 0:        
+        pyautogui.click(coord[0])
+    else:
+        print(f'{target_img_name} 이미지를 현재 이미지에서 찾지 못했습니다.')
+
+def print_log(log):
+    if log_text_view:
+        log_text_view.insert('end', log)
+        log_text_view.insert('end', "'\n'")
