@@ -51,7 +51,7 @@ def search_word(ocr_result, keyword):
         max = 0
         for _, v in enumerate(ocr_result):
              t = difflib.SequenceMatcher(None, v[1], keyword).ratio()
-             if t > max:
+             if t > 0.5 and t > max:
                  found.append(v)
     return found
 
@@ -105,10 +105,14 @@ def first_check():
 
 # 현재 화면의 state을 돌려주는 공용함수
 def get_current_state():
-    texts = get_current_text()
-    for state in state_instances:
-        if state.check(texts):
-            return state
+    loop = 0
+    while(True and loop < 10):
+        texts = get_current_text()
+        for state in state_instances:
+            if state.check(texts):
+                return state
+            
+        time.sleep(1)
         
     return None
 

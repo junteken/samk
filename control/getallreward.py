@@ -45,8 +45,12 @@ class GetAllReward(ControlBase):
                 time.sleep(1)
 
             # 서버가 없다면 scroll해야함
-            self.scroll_until_find_server(sv)
-            commons.touch_on_text(sv)                
+            # self.scroll_until_find_server(sv)
+            while(commons.touch_on_text(sv) == False):
+                pyautogui.moveTo(730, 312)
+                pyautogui.scroll(-10)
+                time.sleep(3)
+            # 서버를 못찾으면 scroll해야함
             time.sleep(1)
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
@@ -126,7 +130,7 @@ class GetAllReward(ControlBase):
 
         # 여기까지 오면 세계로 진입했는지 확인하면 된다.
         cur_state = commons.get_current_state()
-        while(cur_state.name != '세상'):
+        while(cur_state is None or cur_state.name != '세상'):
             # 세상이 아니라 기능오픈인경우 나간다
             pyautogui.press('esc')
             time.sleep(1)
@@ -180,7 +184,7 @@ class GetAllReward(ControlBase):
         self.naming(self.current_server+'빈즈')
 
     def naming(self, user_name):
-        pyautogui.click(987, 532)
+        pyautogui.click(1051, 543, duration=0.5)
         time.sleep(1)
 
         # 이름 입력창뜨고
