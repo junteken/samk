@@ -10,7 +10,7 @@ import cv2
 import numpy as np
 import time
 
-g_reader = easyocr.Reader(['ko', 'en'], gpu=False)
+g_reader = easyocr.Reader(['ko', 'en'], gpu=True)
 
 accountList={
     "창천" : "BlueStacks",
@@ -51,7 +51,7 @@ def search_word(ocr_result, keyword):
         max = 0
         for _, v in enumerate(ocr_result):
              t = difflib.SequenceMatcher(None, v[1], keyword).ratio()
-             if t > 0.5 and t > max:
+             if t > 0.2 and t > max:
                  found.append(v)
     return found
 
@@ -111,6 +111,7 @@ def get_current_state():
         for state in state_instances:
             if state.check(texts):
                 return state
+        loop = loop + 1
             
         time.sleep(1)
         

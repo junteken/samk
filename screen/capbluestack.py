@@ -35,7 +35,7 @@ class CapBlueStack(object):
         rect = win32gui.GetWindowRect(window_handle)
         x, y = rect[0], rect[1]
         # 창 크기를 조정
-        win32gui.MoveWindow(window_handle, x, y, 1280, 720, True)
+        win32gui.MoveWindow(window_handle, x, y, 1920, 1080, True)
         
     def get_window_rect(self, idx):
         """ 핸들에 대응하는 윈도우의 좌표정보를 반환한다
