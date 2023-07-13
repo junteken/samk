@@ -18,6 +18,7 @@ class GetAllReward(ControlBase):
         self.start_screen_state = commons.state_dict['타이틀화면']
         self.serverlist = None
         self.current_server = None
+        self.current_server_coord = None
         self.thread_control = False
 
     def run(self):
@@ -45,12 +46,10 @@ class GetAllReward(ControlBase):
                 time.sleep(1)
 
             # 서버가 없다면 scroll해야함
-            if self.scroll_until_find_server(sv) is False:
-                continue
-            
-            commons.touch_on_text(sv) == False
-                
-            # 서버를 못찾으면 scroll해야함
+            if self.scroll_until_find_server(self.current_server) is False:
+                continue            
+            commons.touch_on_text(self.current_server)
+
             time.sleep(1)
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
@@ -89,13 +88,17 @@ class GetAllReward(ControlBase):
                 pyautogui.press('esc')
                 time.sleep(1)
 
+    # ocr인식 문제로 아래와 같은 알고리즘으로 변경
+    # 입춘대길 = 입초대길 로 인식하는 경우 순서와 글자 2개만
+    # 맞으면 해당 서버가 있는걸로 판단하고 해당좌표와 존재유무를 리턴
     def scroll_until_find_server(self, server_name):
-        while True :    
-            cur_server_list = commons.get_current_text()
-            for server in cur_server_list:
-                if server_name in server:
+        while True :
+            ocr_result, _ = commons.get_current_text()
+            for _, v in enumerate(ocr_result):
+                if self.is_included(server_name, v[1]):
+                    self.current_server_coord = v[0]
                     return True
-                elif self.serverlist[-1] in server:
+                elif self.is_included(self.serverlist[-1], v[1]):
                     print(f'{server_name} 서버를 찾지 못했습니다.')
                     return False
             
@@ -104,6 +107,16 @@ class GetAllReward(ControlBase):
             time.sleep(3)
 
             # 서버를 못찾으면 scroll해야함
+    def is_included(self, str1, str2):
+        count = 0
+        for ch in str1:
+            if ch in str2:
+                count += 1
+                str2 = str2.split(ch, 1)[1]
+
+        matching_percent = (count / len(str1)) * 100
+
+        return matching_percent >= 50
 
     def receive_bokji(self):
         print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')
@@ -130,8 +143,11 @@ class GetAllReward(ControlBase):
             print('첫충전 화면')
             pass 
 
-        pyautogui.press('esc')
-        time.sleep(5) # 첫충전화면을 끄면 기능오픈이 뜰수도 있으므로
+        cur_state = commons.get_current_state()
+
+        if cur_state.name == '첫충전':
+            pyautogui.press('esc')
+            time.sleep(5) # 첫충전화면을 끄면 기능오픈이 뜰수도 있으므로
 
         # 여기까지 오면 세계로 진입했는지 확인하면 된다.
         cur_state = commons.get_current_state()
@@ -141,7 +157,9 @@ class GetAllReward(ControlBase):
             time.sleep(5)
             cur_state = commons.get_current_state()
         
-        success = commons.touch_on_img('bokji')        
+        # 일단 image matching은 잘 동작하지 않아 절대좌표로
+        # success = commons.touch_on_img('bokji')        
+        success = self.search_bokji()
         if success:
             cur_state = commons.get_current_state()
             if cur_state is not None and cur_state.name != '보상':
@@ -168,6 +186,23 @@ class GetAllReward(ControlBase):
 
         print(f'{self.current_server} 서버의 복지 수령완료')
         return True
+    
+    def search_bokji(self):
+        # 복지가 있을수 있는 좌표 (244, 213), (319, 212), (751, 130)
+
+        bokji_coord = [(611, 129), (679, 128), (756, 131)]
+        for coord in bokji_coord:
+            pyautogui.click(coord)
+            time.sleep(3)
+            cur_state = commons.get_current_state()
+            if cur_state.name == '보상':
+                return True
+            else:
+                pyautogui.press('esc')
+                time.sleep(3)
+            
+        return False
+
 
 
     # 나라가입은 ocr인식이 잘 되지 않아 상대좌표에 click하는 형태로 구현함
@@ -188,6 +223,7 @@ class GetAllReward(ControlBase):
 
         self.naming(self.current_server+'빈즈')
 
+    # naming화면은 ocr결과가 좋지 않으므로 절대좌표로 박음
     def naming(self, user_name):
         pyautogui.click(1051, 543, duration=0.5)
         time.sleep(1)
@@ -201,7 +237,8 @@ class GetAllReward(ControlBase):
         pyautogui.hotkey('ctrl', 'v')
         time.sleep(1)
         pyautogui.press('enter')
-        commons.touch_on_text('게임시작')
+        # commons.touch_on_text('게임시작')
+        pyautogui.click(1065, 644)
         time.sleep(10)
 
     def getserverlist(self, filename):

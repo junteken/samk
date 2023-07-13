@@ -106,14 +106,14 @@ def first_check():
 # 현재 화면의 state을 돌려주는 공용함수
 def get_current_state():
     loop = 0
-    while(True and loop < 10):
-        texts = get_current_text()
+    while(True and loop < 5):
+        _, texts = get_current_text()
         for state in state_instances:
             if state.check(texts):
                 return state
         loop = loop + 1
             
-        time.sleep(1)
+        time.sleep(0.5)
         
     return None
 
@@ -121,7 +121,7 @@ def get_current_text():
     bbox, img = bsm.get_CurrentBsImg()
     ocr_result = scan(img)
     recog_texts = [v[1] for _, v in enumerate(ocr_result)]
-    return recog_texts
+    return ocr_result, recog_texts
 
 
 # 인자로 주어진 text영역을 터지하는 함수
@@ -158,31 +158,76 @@ def find_image_coord(large_image, small_image_path):
 
     # 큰 이미지와 작은 이미지의 높이와 너비를 가져옵니다.
     large_height, large_width = large_image.shape[:2]
-    small_height, small_width = small_image.shape[:2]
+    small_height, small_width = small_image.shape[:2]    
+    
+    result = find_image_in_another(small_image, large_image)
 
-    # 템플릿 매칭 메소드를 사용해 이미지를 매칭합니다.
-    result = cv2.matchTemplate(large_image, small_image, cv2.TM_CCOEFF_NORMED)
+    if result is not None:
+        return result
+    else:
+        return None
 
-    # 최소 스코어와 최대 스코어 및 그 위치를 찾습니다.
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+def find_image_in_another(image1, image2):
 
-    # 임계값을 설정하고 매칭된 위치를 찾습니다 (역치에 맞는 경우).
-    threshold = 0.7
-    match_result = []
+    img1_gray = cv2.cvtColor(image1, cv2.COLOR_BGR2GRAY)
+    img2_gray = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
 
-    if max_val > threshold:
-        match_result.append(max_loc)
+    # ORB 검출기 생성
+    orb = cv2.ORB_create()
 
-    return match_result
+    # 이미지 1 (template)에서 ORB 특징점 검출
+    keypoints1, descriptors1 = orb.detectAndCompute(img1_gray, None)
 
+    # 이미지 2 (target)에서 ORB 특징점 검출
+    keypoints2, descriptors2 = orb.detectAndCompute(img2_gray, None)
+
+    # Brute Force 매칭기 초기화 및 매칭시작
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    matches = bf.match(descriptors1, descriptors2)
+
+    # 매칭된 결과를 거리에 따라 정렬
+    matches = sorted(matches, key = lambda x:x.distance)
+
+    # 일정 비율 이상의 좋은 매칭점만 추출
+    good_matches = []
+    for m in matches:
+        if m.distance < 60:
+            good_matches.append(m)
+
+    # 매칭된 특징점이 일정 개수 이상일 경우 이미지 1 (template)이 이미지 2 (target)에 포함되어 있는 것으로 판단
+    if len(good_matches) > 5:
+
+        # 매칭 결과로부터 이미지 1 (template)과 이미지 2 (target)에서 매칭된 좌표를 추출
+        src_pts = np.float32([ keypoints1[m.queryIdx].pt for m in good_matches ]).reshape(-1,1,2)
+        dst_pts = np.float32([ keypoints2[m.trainIdx].pt for m in good_matches ]).reshape(-1,1,2)
+
+        # 이미지 1 (template)과 이미지 2 (target)에서 매칭된 특징점을 이용하여 perspective transform 계산
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+
+        h,w,_ = image1.shape
+        pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        dst = cv2.perspectiveTransform(pts,M)
+
+        x_min, y_min = dst.min(axis=0)
+        x_max, y_max = dst.max(axis=0)
+
+        if x_min >= 0 and y_min >= 0 and x_max <= image2.shape[1] and y_max <= image2.shape[0]:
+            return [(x[0], y[0]) for (x,y) in dst]
+        else:
+            return None
+
+    else:
+        return None
+    
 def touch_on_img(target_img_name):
     _, img = bsm.get_CurrentBsImg()
     tg_img_path = '.\\rsrc\\target_img\\' + target_img_name + '.png'
     coord = None
 
     coord = find_image_coord(img, tg_img_path)
-    if len(coord) > 0:        
+    if coord is not None:        
         pyautogui.click(coord[0])
+        print(f'발견한 이미지 좌표는{coord[0]}')
         time.sleep(1)
         return True
     else:

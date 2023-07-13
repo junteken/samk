@@ -94,7 +94,7 @@ def on_cancel_click():
     current_control_item.join()
 
 def on_scan_click():
-    ocr_text = commons.get_current_text()
+    _, ocr_text = commons.get_current_text()
     bbox, img = commons.bsm.get_CurrentBsImg()
     update_image(img)
     text_view.insert('end', ocr_text)
