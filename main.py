@@ -5,6 +5,7 @@ import time
 import tkinter as tk
 from tkinter import ttk, filedialog
 from PIL import Image, ImageTk
+import threading
 
 commons.setup()
 # commons.first_check()
@@ -13,7 +14,7 @@ import control_manager
 
 # 전역변수 설정
 current_control_item = None
-
+stop_event = threading.Event()
 # 윈도우 생성
 root = tk.Tk()
 root.title("GUI Example")
@@ -84,14 +85,10 @@ def on_start_click():
     selected_item = get_selected_item_text()
     current_control_item = control_manager.control_dict[selected_item]
 
-    current_control_item().start()
+    current_control_item(stop_event).start()
 
 def on_cancel_click():
-    if current_control_item is None:
-        return
-    current_control_item.thread_control = False
-    current_control_item.stop()
-    current_control_item.join()
+    stop_event.set()
 
 def on_scan_click():
     _, ocr_text = commons.get_current_text()
@@ -129,3 +126,6 @@ save_btn.pack(side="left", padx=5)
 
 # 메인 루프 실행
 root.mainloop()
+
+stop_event.set()
+current_control_item.join()

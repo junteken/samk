@@ -115,7 +115,7 @@ def get_current_state():
             
         time.sleep(0.5)
         
-    return None
+    return state_dict['알수없음']
 
 def get_current_text():
     bbox, img = bsm.get_CurrentBsImg()

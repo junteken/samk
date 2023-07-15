@@ -11,7 +11,7 @@ class GetAllReward(ControlBase):
     # [S 0O1] <-- 요렇게 인식됨
     con_name = '모든 서버 보상 얻기'
 
-    def __init__(self):
+    def __init__(self, stop_event):
         super().__init__()
         # self.name='모든 서버 보상 얻기'
         # 모든 제어는 최초 화면 상태를 맞추고 시작해야하므로 최초 화면의 상태를 
@@ -19,11 +19,10 @@ class GetAllReward(ControlBase):
         self.serverlist = None
         self.current_server = None
         self.current_server_coord = None
-        self.thread_control = False
+        self.stop_event = stop_event
 
     def run(self):
-        # 처음에는 해당 state가 맞는지 검사해야함
-        self.thread_control = True
+        # 처음에는 해당 state가 맞는지 검사해야함        
         chk_state = self.check()
         if chk_state is False:
             print('자동화를 시작하기위한 초기 상태가 아닙니다.')
@@ -35,7 +34,7 @@ class GetAllReward(ControlBase):
         self.serverlist = self.getserverlist('hb')
 
         for sv in self.serverlist:
-            if self.thread_control is False:
+            if self.stop_event.is_set():
                 return
             # sv = '입초대길'
             self.current_server = sv
@@ -64,6 +63,8 @@ class GetAllReward(ControlBase):
             cur_state = commons.get_current_state()
 
             while cur_state.name != '게임종료':
+                if self.stop_event.is_set():
+                    return
                 pyautogui.press('esc')
                 time.sleep(1)
                 cur_state = commons.get_current_state()
@@ -93,13 +94,19 @@ class GetAllReward(ControlBase):
     # 맞으면 해당 서버가 있는걸로 판단하고 해당좌표와 존재유무를 리턴
     def scroll_until_find_server(self, server_name):
         while True :
+            if self.stop_event.is_set():
+                return
+            at_the_end = 0
             ocr_result, _ = commons.get_current_text()
             for _, v in enumerate(ocr_result):
                 if self.is_included(server_name, v[1]):
                     self.current_server_coord = v[0]
                     return True
                 elif self.is_included(self.serverlist[-1], v[1]):
-                    print(f'{server_name} 서버를 찾지 못했습니다.')
+                    at_the_end += 1
+                    print(f'{self.serverlist[-1]} 이 {v[1]} 에 존재합니다.')
+                    if at_the_end > 3:
+                        print(f'{server_name} 서버를 찾지 못했습니다.')
                     return False
             
             pyautogui.moveTo(730, 312)
@@ -107,16 +114,27 @@ class GetAllReward(ControlBase):
             time.sleep(3)
 
             # 서버를 못찾으면 scroll해야함
+    # target의 글자가 str1에 
     def is_included(self, str1, str2):
-        count = 0
-        for ch in str1:
-            if ch in str2:
-                count += 1
-                str2 = str2.split(ch, 1)[1]
+        str1_len = len(str1)
+        str2_len = len(str2)
+        threshold = str1_len * 0.5
 
-        matching_percent = (count / len(str1)) * 100
-
-        return matching_percent >= 50
+        for i in range(str2_len - str1_len + 1):
+        # matching_count = sum(1 for a, b in zip(str1, str2[i:i+str1_len]) if a == b)
+            matching_count = 0        
+            for a, b in zip(str1, str2[i:i+str1_len]):
+                # 인식되는 공백이 있을수도 있는데
+                # 서버명들은 공백이 없는걸로 txt파일에 넣었으므로
+                if b == ' ':
+                    continue
+                if a == b:
+                    matching_count += 1            
+            if matching_count >= threshold:
+                print(f'찾을문자열 = {str1}, 대상문자열 = {str2[i:i+str1_len]} 찾음')
+                return True
+        
+        return False
 
     def receive_bokji(self):
         print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')
@@ -127,7 +145,7 @@ class GetAllReward(ControlBase):
         #시작버튼을 누르면 여러가지 화면으로 바뀐다.
         cur_state = commons.get_current_state()
 
-        if cur_state is None:
+        if cur_state.name == '알수없음':
             print('재돌입 후 이름설정화면')
             self.naming(self.current_server+'빈즈')
         
@@ -152,6 +170,8 @@ class GetAllReward(ControlBase):
         # 여기까지 오면 세계로 진입했는지 확인하면 된다.
         cur_state = commons.get_current_state()
         while(cur_state is None or cur_state.name != '세상'):
+            if self.stop_event.is_set():
+                return
             # 세상이 아니라 기능오픈인경우 나간다
             pyautogui.press('esc')
             time.sleep(5)
@@ -189,12 +209,16 @@ class GetAllReward(ControlBase):
     
     def search_bokji(self):
         # 복지가 있을수 있는 좌표 (244, 213), (319, 212), (751, 130)
+        top_search_coord = [(551, 131), (629, 131), 
+                            (692, 131), (762, 131)]
+        bottom_search_coord = [(252, 212), (322, 212)]        
+        bokji_coord = top_search_coord + bottom_search_coord
 
-        bokji_coord = [(611, 129), (679, 128), (756, 131)]
         for coord in bokji_coord:
             pyautogui.click(coord)
             time.sleep(3)
             cur_state = commons.get_current_state()
+            
             if cur_state.name == '보상':
                 return True
             else:
