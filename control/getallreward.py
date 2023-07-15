@@ -20,6 +20,8 @@ class GetAllReward(ControlBase):
         self.current_server = None
         self.current_server_coord = None
         self.stop_event = stop_event
+        self.bbox = None
+        self.postfix = '빈즈'
 
     def run(self):
         # 처음에는 해당 state가 맞는지 검사해야함        
@@ -29,14 +31,12 @@ class GetAllReward(ControlBase):
             raise InvalidStateError("자동화를 시작하기위한 초기 상태가 아닙니다.")
         
         print('초기상태 일치 확인완료')
-
         # 탐색할 서버의 txt파일이름을 아래에 넣어준다.
         self.serverlist = self.getserverlist('hb')
 
         for sv in self.serverlist:
             if self.stop_event.is_set():
-                return
-            # sv = '입초대길'
+                return            
             self.current_server = sv
             # 초기상태는 타이틀화면 이다.                        
             touch_texts = ['서버클리', '시즌서버', 'HB']
@@ -47,9 +47,9 @@ class GetAllReward(ControlBase):
             # 서버가 없다면 scroll해야함
             if self.scroll_until_find_server(self.current_server) is False:
                 continue            
-            commons.touch_on_text(self.current_server)
-
+            commons.touch_on_text(self.current_server, self.current_server_coord)
             time.sleep(1)
+
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
                 # 일단은 text view에 출력
@@ -93,6 +93,17 @@ class GetAllReward(ControlBase):
     # 입춘대길 = 입초대길 로 인식하는 경우 순서와 글자 2개만
     # 맞으면 해당 서버가 있는걸로 판단하고 해당좌표와 존재유무를 리턴
     def scroll_until_find_server(self, server_name):
+        if len(server_name) == 2:
+            commons.moveTo_mouse((730,312))
+            for i in range(7):            
+                pyautogui.scroll(-100)
+                time.sleep(3)
+        elif server_name[0] == 'S':
+            commons.moveTo_mouse((730,312))
+            for i in range(15):            
+                pyautogui.scroll(-100)
+                time.sleep(3)
+                
         while True :
             if self.stop_event.is_set():
                 return
@@ -109,24 +120,48 @@ class GetAllReward(ControlBase):
                         print(f'{server_name} 서버를 찾지 못했습니다.')
                     return False
             
-            pyautogui.moveTo(730, 312)
+            commons.moveTo_mouse((730,312))
             pyautogui.scroll(-10)
             time.sleep(3)
 
             # 서버를 못찾으면 scroll해야함
-    # target의 글자가 str1에 
+    # 서버명을 찾을때 찾으려는 문자열이 모두 존재하면 찾은걸로하고
+    # 존재하지 않으면 threshold값기반의 검색을 한다.
+    # 2글자짜리 서버의 경우는 무조건 모든 문자가 일치해야한다.
     def is_included(self, str1, str2):
+        # 매칭되는 문자열이 있는지 확인
+        if str1 in str2:
+            return True        
+        elif str1[0] == 'S':
+            # S로 시작하는 서버의 경우 001, 002와 같은 서버는
+            # threshold로 하면 무조건 50%가 넘으므로
+            if str1[2:] in str2:
+                return True
+
+        elif len(str1) < 3:
+            # 글자수가 2글자짜리이므로 전체가 매칭되어야함
+            # 해당 2글자짜리 서버는 매칭이 안되니
+            # txt파일 수정요망
+            print(f'{str1} 서버이름은 OCR인식결과로 안나옵니다.')
+            if self.is_included_threshold(str1, str2):
+                print(f'{str1} 과 유사하다고 검색되는건 {str2}')
+            return False
+        else:
+            return self.is_included_threshold(str1, str2)
+
+
+    # target의 글자가 str1에 
+    def is_included_threshold(self, str1, str2):
         str1_len = len(str1)
         str2_len = len(str2)
         threshold = str1_len * 0.5
 
         for i in range(str2_len - str1_len + 1):
-        # matching_count = sum(1 for a, b in zip(str1, str2[i:i+str1_len]) if a == b)
             matching_count = 0        
             for a, b in zip(str1, str2[i:i+str1_len]):
                 # 인식되는 공백이 있을수도 있는데
                 # 서버명들은 공백이 없는걸로 txt파일에 넣었으므로
-                if b == ' ':
+                if b == ' ' or b == '[' or b == ']':
                     continue
                 if a == b:
                     matching_count += 1            
@@ -147,7 +182,7 @@ class GetAllReward(ControlBase):
 
         if cur_state.name == '알수없음':
             print('재돌입 후 이름설정화면')
-            self.naming(self.current_server+'빈즈')
+            self.naming()
         
         # naming state가 없는 이유는 title과 겹치기때문
         # elif cur_state.name == '유저이름':
@@ -227,8 +262,6 @@ class GetAllReward(ControlBase):
             
         return False
 
-
-
     # 나라가입은 ocr인식이 잘 되지 않아 상대좌표에 click하는 형태로 구현함
     def join_country(self, country_name):
         print(f'{country_name} 나라의 가입을 시작합니다.')        
@@ -244,12 +277,16 @@ class GetAllReward(ControlBase):
         # 컨펌화면
         commons.touch_on_text('가입')
         time.sleep(1)
-
-        self.naming(self.current_server+'빈즈')
+        
+        if self.current_server[0] == 'S':
+            self.naming()
+        else:
+            self.naming()
 
     # naming화면은 ocr결과가 좋지 않으므로 절대좌표로 박음
-    def naming(self, user_name):
-        pyautogui.click(1051, 543, duration=0.5)
+    def naming(self):
+        # pyautogui.click(1051, 543, duration=0.5)
+        commons.mouseclick((1051,543))
         time.sleep(1)
 
         # 이름 입력창뜨고
@@ -257,12 +294,17 @@ class GetAllReward(ControlBase):
             pyautogui.press('backspace')
 
         time.sleep(1)
+        if self.current_server[0] == 'S':
+            user_name = self.current_server[2:] + self.postfix
+        else:
+            user_name = self.current_server
+            
         pyperclip.copy(user_name)        
         pyautogui.hotkey('ctrl', 'v')
         time.sleep(1)
         pyautogui.press('enter')
         # commons.touch_on_text('게임시작')
-        pyautogui.click(1065, 644)
+        commons.mouseclick((1065, 644))
         time.sleep(10)
 
     def getserverlist(self, filename):

@@ -12,18 +12,8 @@ import time
 
 g_reader = easyocr.Reader(['ko', 'en'], gpu=True)
 
-accountList={
-    "창천" : "BlueStacks",
-    "초월" : "",
-    "은선" : "",
-    "백호" : "",
-    "주작" : "",
-    "진룡" : "",
-    "봉무" : "",
-    "정련" : "",
-}
-
 window_name = 'romancek'
+window_bbox = None
 state_instances = []
 state_dict = {}
 bsm= BsMultiManager()
@@ -57,6 +47,7 @@ def search_word(ocr_result, keyword):
 
 def setup():
     # screen에 있는 모든 class들의 인스턴스를 생성하는 코드
+    window_bbox = bsm.get_CurrentBsImg()
     modules_folder_path = Path("screen")
     sys.path.insert(0, str(modules_folder_path.resolve()))
 
@@ -123,10 +114,21 @@ def get_current_text():
     recog_texts = [v[1] for _, v in enumerate(ocr_result)]
     return ocr_result, recog_texts
 
-
+def moveTo_mouse(coord):
+    pyautogui.moveTo(bsm.current_bsBbox[0]+coord[0], 
+                     bsm.current_bsBbox[1]+coord[1])
+    
+def mouseclick(coord):
+    pyautogui.click(bsm.current_bsBbox[0]+coord[0], 
+                     bsm.current_bsBbox[1]+coord[1])
 # 인자로 주어진 text영역을 터지하는 함수
 # 동일한 text가 없다면 가장 유사한 문자의 첫번째 인자를 터치
-def touch_on_text(text):
+def touch_on_text(text, coord=None):
+    if coord is not None:
+        pyautogui.click(bsm.current_bsBbox[0] + coord[0][0],
+                        bsm.current_bsBbox[0] + coord[0][1])
+        return True
+
     bbox, result = bsm.get_screen_ocr()
     found = search_word(result, text)
     if len(found) == 0:
