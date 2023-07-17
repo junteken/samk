@@ -22,6 +22,7 @@ class GetAllReward(ControlBase):
         self.stop_event = stop_event
         self.bbox = None
         self.postfix = '빈즈'
+        self.illegalstr= {'청운지지':'청운빈즈'}
 
     def run(self):
         # 처음에는 해당 state가 맞는지 검사해야함        
@@ -121,7 +122,10 @@ class GetAllReward(ControlBase):
                     return False
             
             commons.moveTo_mouse((730,312))
-            pyautogui.scroll(-10)
+            if(self.current_server[0] == 'S'):
+                pyautogui.scroll(-3)
+            else:
+                pyautogui.scroll(-10)
             time.sleep(3)
 
             # 서버를 못찾으면 scroll해야함
@@ -294,10 +298,13 @@ class GetAllReward(ControlBase):
             pyautogui.press('backspace')
 
         time.sleep(1)
-        if self.current_server[0] == 'S':
+        # 청운지지 서버의 경우 불법문자로 인식됨.
+        if self.current_server in self.illegalstr:
+            user_name = self.illegalstr[self.current_server]
+        elif self.current_server[0] == 'S':
             user_name = self.current_server[2:] + self.postfix
         else:
-            user_name = self.current_server
+            user_name = self.current_server + self.postfix
             
         pyperclip.copy(user_name)        
         pyautogui.hotkey('ctrl', 'v')
