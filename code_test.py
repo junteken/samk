@@ -1,3 +1,5 @@
+from common import commons
+
 def check_substring(str1, str2):
     str1_len = len(str1)
     str2_len = len(str2)
@@ -24,3 +26,8 @@ if check_substring(str1, str2):
     print("str1 exists in str2.")
 else:
     print("str1 does not exist in str2.")
+
+
+serverlist = commons.getserverlist('hb')
+
+print(serverlist)

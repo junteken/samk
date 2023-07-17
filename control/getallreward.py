@@ -22,6 +22,7 @@ class GetAllReward(ControlBase):
         self.stop_event = stop_event
         self.bbox = None
         self.postfix = '빈즈'
+        self.start_server_name = '순망치한'
         self.illegalstr= {'청운지지':'청운빈즈'}
 
     def run(self):
@@ -33,11 +34,14 @@ class GetAllReward(ControlBase):
         
         print('초기상태 일치 확인완료')
         # 탐색할 서버의 txt파일이름을 아래에 넣어준다.
-        self.serverlist = self.getserverlist('hb')
+        self.serverlist = commons.getserverlist('hb')
+        start = self.serverlist[self.start_server_name]
 
-        for sv in self.serverlist:
+        for idx, sv in enumerate(self.serverlist):
             if self.stop_event.is_set():
                 return            
+            if idx < start:
+                continue
             self.current_server = sv
             # 초기상태는 타이틀화면 이다.                        
             touch_texts = ['서버클리', '시즌서버', 'HB']
@@ -46,10 +50,11 @@ class GetAllReward(ControlBase):
                 time.sleep(1)
 
             # 서버가 없다면 scroll해야함
-            if self.scroll_until_find_server(self.current_server) is False:
-                continue            
-            commons.touch_on_text(self.current_server, self.current_server_coord)
-            time.sleep(1)
+            # if self.scroll_until_find_server(self.current_server) is False:
+            #     continue            
+            # commons.touch_on_text(self.current_server, self.current_server_coord)
+            # time.sleep(1)
+            commons.selectserver(self.serverlist[self.current_server])
 
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
@@ -313,16 +318,6 @@ class GetAllReward(ControlBase):
         # commons.touch_on_text('게임시작')
         commons.mouseclick((1065, 644))
         time.sleep(10)
-
-    def getserverlist(self, filename):
-        filepath = './rsrc/' + filename
-        sv_list = []
-        with open(filepath, "r", encoding="utf-8") as file:
-            sv_list = [line.strip() for line in file]
-
-        return sv_list
-
-            
 
         
 

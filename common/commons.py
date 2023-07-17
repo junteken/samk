@@ -249,9 +249,9 @@ def print_log(log):
 
 def getserverlist(filename):
         filepath = './rsrc/' + filename
-        sv_list = []
+        
         with open(filepath, "r", encoding="utf-8") as file:
-            sv_list = [line.strip() for line in file]
+            sv_list = {line.strip():idx for idx, line in enumerate(file) }
 
         return sv_list
 
