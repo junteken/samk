@@ -18,6 +18,12 @@ state_instances = []
 state_dict = {}
 bsm= BsMultiManager()
 log_text_view = None
+page_scroll_unit = 62
+server_name_font_height = 61
+left_server_point = (540, 213)
+right_server_point = (920, 213)
+
+
 
 def scan(bsimage):
     img_byte = io.BytesIO()
@@ -240,3 +246,40 @@ def print_log(log):
     if log_text_view:
         log_text_view.insert('end', log)
         log_text_view.insert('end', "'\n'")
+
+def getserverlist(filename):
+        filepath = './rsrc/' + filename
+        sv_list = []
+        with open(filepath, "r", encoding="utf-8") as file:
+            sv_list = [line.strip() for line in file]
+
+        return sv_list
+
+
+
+def scroll_pgdwn(count):
+    for i in range(count):
+        pyautogui.moveTo(715, 685)
+        # pyautogui.drag(0, -520, 10, button='left')
+        pyautogui.dragTo(715, 164, 5, pyautogui.easeOutQuad, button='left')
+        # pyautogui.drag(10, 0, 2, button='left')
+        # time.sleep(1)
+
+def selectserver(index):
+    # 8로 나누어 몫과 나머지를 구한다.
+    quotient = index // 16
+    remainder = index % 16
+    scroll_pgdwn(quotient)
+
+    if remainder % 2 == 0:
+        #짝수인경우 왼쪽에 있는 서버리스트이다.
+        pyautogui.click((left_server_point[0], left_server_point[1] + 
+                         server_name_font_height *(remainder//2)))
+    else:
+        pyautogui.click((right_server_point[0], right_server_point[1] + 
+                         server_name_font_height*(remainder//2)))
+
+    time.sleep(1)
+
+
+    

@@ -2,6 +2,7 @@ import os
 import sys
 import importlib
 from control.getallreward import GetAllReward
+from control.tourall import TourAll
 
 # directory = './control'
 
@@ -19,6 +20,7 @@ from control.getallreward import GetAllReward
 
 control_item=[
     GetAllReward,
+    TourAll
 ]
 
 control_dict={}
