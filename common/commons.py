@@ -259,7 +259,7 @@ def getserverlist(filename):
 
 def scroll_pgdwn(count):
     for i in range(count):
-        pyautogui.moveTo(715, 685)
+        pyautogui.moveTo(715, 708)
         # pyautogui.drag(0, -520, 10, button='left')
         pyautogui.dragTo(715, 164, 5, pyautogui.easeOutQuad, button='left')
         # pyautogui.drag(10, 0, 2, button='left')

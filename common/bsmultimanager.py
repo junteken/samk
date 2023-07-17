@@ -7,7 +7,7 @@ class BsMultiManager(object):
 
     def __init__(self):
         self.bs= capbluestack.CapBlueStack()
-        # self.bs.set_window_size_default()
+        self.bs.set_window_size_default()
         self.current_bsIdx=0 #현재 bluestack instance number
         self.current_bsBbox=None
         self.fn_update_imageview = None

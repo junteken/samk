@@ -32,8 +32,9 @@ class CapBlueStack(object):
             print(f"'{commons.window_name}' 애플리케이션을 찾을 수 없습니다.")
             return
         
-        rect = win32gui.GetWindowRect(window_handle)
+        rect = win32gui.GetWindowRect(window_handle)        
         x, y = rect[0], rect[1]
+        print(f'{commons.window_name}의 시작좌표는 {x}, {y}, width={rect[2]}, height={rect[3]}')
         # 창 크기를 조정
         win32gui.MoveWindow(window_handle, x, y, 1280, 720, True)
         
