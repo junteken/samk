@@ -22,8 +22,6 @@ class TourAll(ControlBase):
         # HB서버 리스트 화면까지 왔음
         serverlist = commons.getserverlist('hb')
 
-        time.sleep(3)
-
         for i, server in enumerate(serverlist, start=48):
             if self.stop_event.is_set():
                 return            

@@ -50,5 +50,10 @@ else:
 
     handle_window(window)
 
-    post_key_event(0x000C0762, 'w')
+    # post_key_event(0x000C0762, 'w')
+    win32gui.SetWindowPos(window, win32con.HWND_TOP, 0, 0, 1280, 720,  win32con.SWP_SHOWWINDOW)
+
+    rect = win32gui.GetWindowRect(window)        
+    x, y = rect[0], rect[1]
+    print(f'{app_title}의 시작좌표는 {x}, {y}, width={rect[2]}, height={rect[3]}')
 

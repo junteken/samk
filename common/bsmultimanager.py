@@ -1,4 +1,4 @@
-from screen import capbluestack
+from common import capbluestack
 from common import commons
 import time
 import pyautogui

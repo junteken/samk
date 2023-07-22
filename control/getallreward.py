@@ -22,7 +22,7 @@ class GetAllReward(ControlBase):
         self.stop_event = stop_event
         self.bbox = None
         self.postfix = '빈즈'
-        self.start_server_name = '순망치한'
+        self.start_server_name = '협객'
         self.illegalstr= {'청운지지':'청운빈즈'}
 
     def run(self):

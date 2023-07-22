@@ -23,7 +23,7 @@ root.title("GUI Example")
 left_frame = ttk.Frame(root)
 left_frame.pack(side="left", padx=5, pady=10)
 
-right_frame = ttk.Frame(root)
+right_frame = ttk.Frame(root)      
 right_frame.pack(side="right", padx=5, pady=10)
 
 bottom_frame = ttk.Frame(root)
