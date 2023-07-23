@@ -23,7 +23,7 @@ class GetAllReward(ControlBase):
         self.bbox = None
         self.postfix = '빈즈'
         self.start_server_name = '황하'
-        self.illegalstr= {'청운지지':'청운빈즈'}
+        self.illegalstr= {'청운지지':'청운빈즈', '천년':'천국빈즈'}
 
     def run(self):
         # 처음에는 해당 state가 맞는지 검사해야함        
