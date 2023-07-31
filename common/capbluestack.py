@@ -30,7 +30,7 @@ class CapBlueStack(object):
             print(f"'{commons.window_name}' 애플리케이션을 찾을 수 없습니다.")
             return
         
-        win32gui.SetWindowPos(window_handle, win32con.HWND_TOPMOST, 0, 0, 1280, 720,  win32con.SWP_SHOWWINDOW)
+        # win32gui.SetWindowPos(window_handle, win32con.HWND_TOPMOST, 0, 0, 1280, 720,  win32con.SWP_SHOWWINDOW)
 
         rect = win32gui.GetWindowRect(window_handle)        
         x, y = rect[0], rect[1]

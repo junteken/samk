@@ -11,25 +11,35 @@ class Grow(ControlBase):
     con_name = '일일미션'
 
     def __init__(self, stop_event):
-        super().__init__(stop_event)
-        # self.name='모든 서버 보상 얻기'
-        # 모든 제어는 최초 화면 상태를 맞추고 시작해야하므로 최초 화면의 상태를 
+        super().__init__(stop_event)        
+        # grow는 기본적으로 국가선택, 네이밍까지 완료된 상태의 서버만 실행
         self.start_screen_state = commons.state_dict['타이틀화면']
+        self.target_server_name = '입춘대길'
+
+    def run(self):
+        # 처음에는 해당 state가 맞는지 검사해야함        
+        chk_state = self.check()
+        if chk_state is False:
+            print(f'{Grow.con_name} 자동화를 시작하기위한 초기 상태가 아닙니다.')
+            return
         
+        print('초기상태 일치 확인완료')
+        # 탐색할 서버의 txt파일이름을 아래에 넣어준다.
+        self.serverlist = commons.getserverlist('hb')
+        start = self.serverlist[self.start_server_name]
 
-    def run(self):             
-
-        # HB서버 리스트 화면까지 왔음
-        serverlist = commons.getserverlist('hb')
-
-        for i, server in enumerate(serverlist, start=48):
+        for idx, sv in enumerate(self.serverlist):
             if self.stop_event.is_set():
                 return            
-
-            print(f'{server} 를 선택하겠습니다.')
-            commons.selectserver(i)
-            time.sleep(1)
+            if idx < start:
+                continue
+            self.current_server = sv
+            # 초기상태는 타이틀화면 이다.                        
             touch_texts = ['서버클리', '시즌서버', 'HB']
             for t in touch_texts:
                 commons.touch_on_text(t)
                 time.sleep(1)
+
+            
+        
+        
