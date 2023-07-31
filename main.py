@@ -12,120 +12,127 @@ commons.setup()
 
 import control_manager
 
-# 전역변수 설정
-current_control_item = None
-stop_event = threading.Event()
-# 윈도우 생성
-root = tk.Tk()
-root.title("GUI Example")
+import threading
+import time
+import tkinter as tk
 
-# 프레임 생성
-left_frame = ttk.Frame(root)
-left_frame.pack(side="left", padx=5, pady=10)
+class MainWindow(tk.Frame):
 
-right_frame = ttk.Frame(root)      
-right_frame.pack(side="right", padx=5, pady=10)
+    def __init__(self, parent, *args, **kwargs):
+        tk.Frame.__init__(self, parent, *args, **kwargs)
+        self.parent = parent
+        self.current_control_item = None
+        self.create_widgets()
+        for item in control_manager.control_item:
+            self.list_view.insert('', 'end', text=item.con_name)
+        commons.bsm.fn_update_imageview = self.update_image
+        self.stop_event = None
 
-bottom_frame = ttk.Frame(root)
-bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
+        parent.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-def get_selected_item_text(event=None):
-    item = list_view.item(list_view.focus()) # 선택된 항목의 아이디 가져오기
-    cur_item = item['text'] # 아이디를 사용해 항목의 텍스트 속성 가져오기
-    return cur_item    
+    def create_widgets(self):
+        self.parent.title('삼국지k 자동화툴')
 
-# 리스트뷰 생성
-list_view = ttk.Treeview(left_frame, selectmode='browse')
-list_view.bind('<<TreeviewSelect>>', get_selected_item_text)
-list_view.pack(fill="both", expand=True)
+        # 프레임 생성
+        left_frame = ttk.Frame(self.parent)
+        left_frame.pack(side="left", padx=5, pady=10)
 
+        right_frame = ttk.Frame(self.parent)      
+        right_frame.pack(side="right", padx=5, pady=10)
 
+        bottom_frame = ttk.Frame(self.parent)
+        bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
-# 여러 데이터 삽입
-# for i in len(control_manager.control_item):
-#     list_view.insert('', 'end', text="Item " + str(i))
-for item in control_manager.control_item:
-    list_view.insert('', 'end', text=item.con_name)
+        # 리스트뷰 생성
+        self.list_view = ttk.Treeview(left_frame, selectmode='browse')
+        self.list_view.bind('<<TreeviewSelect>>', self.get_selected_item_text)
+        self.list_view.pack(fill="both", expand=True)
 
+        # 이미지뷰 생성
+        _, cur_img = commons.bsm.get_CurrentBsImg()
+        photo = ImageTk.PhotoImage(cur_img)
 
-# 이미지뷰 생성
-# image = Image.open("./rsrc/state_img/world.jpg")  # 여기에 로컬 이미지 파일 경로를 입력하세요.
-_, cur_img = commons.bsm.get_CurrentBsImg()
-photo = ImageTk.PhotoImage(cur_img)
+        self.image_label = ttk.Label(right_frame, image=photo)
+        self.image_label.pack()
+        # 왼쪽 클릭시 이벤트 발생 cb 등록
+        self.image_label.bind('<Button-1>', self.img_click_event)
 
-def mouse_click_event(event):
-    x, y = event.x, event.y
-    print(f"Relative coordinates: ({x}, {y})")
+        # 텍스트뷰와 스크롤바를 위한 프레임 생성
+        text_frame = ttk.Frame(left_frame)
+        text_frame.pack(fill="both", expand=True)
 
-image_label = ttk.Label(right_frame, image=photo)
-image_label.pack()
-image_label.bind('<Button-1>', mouse_click_event)
+        # 텍스트뷰 및 스크롤바 생성
+        self.text_view = tk.Text(text_frame, wrap="word")
+        self.text_view.pack(side="left", fill="both", expand=True)
 
-# 텍스트뷰와 스크롤바를 위한 프레임 생성
-text_frame = ttk.Frame(left_frame)
-text_frame.pack(fill="both", expand=True)
+        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=self.text_view.yview)
+        scrollbar.pack(side="right", fill="y")
 
-# 텍스트뷰 및 스크롤바 생성
-text_view = tk.Text(text_frame, wrap="word")
-text_view.pack(side="left", fill="both", expand=True)
+        self.text_view.config(yscrollcommand=scrollbar.set)
 
-scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=text_view.yview)
-scrollbar.pack(side="right", fill="y")
+        commons.log_text_view = self.text_view
 
-text_view.config(yscrollcommand=scrollbar.set)
+        # 왼쪽 프레임의 하단에 버튼 추가
+        bottom_frame = ttk.Frame(left_frame)
+        bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
-commons.log_text_view = text_view
+        # 버튼 생성
+        self.start_btn = ttk.Button(bottom_frame, text="시작", command=self.on_start_click)
+        self.start_btn.pack(side="left", padx=5)
+        self.cancel_btn = ttk.Button(bottom_frame, text="중지", command=self.on_cancel_click)
+        self.cancel_btn.pack(side="left", padx=5)
+        self.scan_btn = ttk.Button(bottom_frame, text="스캔", command=self.on_scan_click)
+        self.scan_btn.pack(side="left", padx=5)
+        self.save_btn = ttk.Button(bottom_frame, text="저장", command=self.on_save_click)
+        self.save_btn.pack(side="left", padx=5)
 
-# 왼쪽 프레임의 하단에 버튼 추가
-bottom_frame = ttk.Frame(left_frame)
-bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
+    def on_start_click(self):
+        self.start_btn.config(state='disabled')
+        selected_item = self.get_selected_item_text()
+        self.current_control_item = control_manager.control_dict[selected_item]
+        self.stop_event = threading.Event()
+        self.current_control_item(self.stop_event).start()
 
-def on_start_click():
-    global current_control_item
-    selected_item = get_selected_item_text()
-    current_control_item = control_manager.control_dict[selected_item]
+    def on_cancel_click(self):
+        if self.current_control_item is not None:
+            self.current_control_item.stop_event.set()        
 
-    current_control_item(stop_event).start()
+    def on_scan_click(self):
+        _, ocr_text = commons.get_current_text()
+        _, img = commons.bsm.get_CurrentBsImg()
+        self.update_image(img)
+        self.text_view.insert('end', ocr_text)
+        self.text_view.insert('end', "'\n'")
 
-def on_cancel_click():
-    stop_event.set()
+    def on_save_click():
+        bbox, img = commons.bsm.get_CurrentBsImg()
+        file_name = filedialog.asksaveasfilename(defaultextension=".png", 
+                                                    filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
+        if file_name:
+            img.save(file_name)
 
-def on_scan_click():
-    _, ocr_text = commons.get_current_text()
-    bbox, img = commons.bsm.get_CurrentBsImg()
-    update_image(img)
-    text_view.insert('end', ocr_text)
-    text_view.insert('end', "'\n'")
+    def update_image(self, img):
+        global photo
+        # 이미지 업데이트    
+        new_photo = ImageTk.PhotoImage(img)
+        self.image_label.configure(image=new_photo)
+        photo = new_photo
 
-def on_save_click():
-    bbox, img = commons.bsm.get_CurrentBsImg()
-    file_name = filedialog.asksaveasfilename(defaultextension=".png", 
-                                             filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
-    if file_name:
-        img.save(file_name)
+    def get_selected_item_text(self, event=None):
+        item = self.list_view.item(self.list_view.focus()) # 선택된 항목의 아이디 가져오기
+        cur_item = item['text'] # 아이디를 사용해 항목의 텍스트 속성 가져오기
+        return cur_item    
+    
+    def img_click_event(self, event):
+        x, y = event.x, event.y
+        print(f"Relative coordinates: ({x}, {y})")
 
-def update_image(img):
-    global photo
-    # 이미지 업데이트    
-    new_photo = ImageTk.PhotoImage(img)
-    image_label.configure(image=new_photo)
-    photo = new_photo
+    def on_closing(self):
+        self.stop_event.set()
+        self.parent.destroy()
 
-commons.bsm.fn_update_imageview = update_image
-
-# 버튼 생성
-start_btn = ttk.Button(bottom_frame, text="시작", command=on_start_click)
-start_btn.pack(side="left", padx=5)
-cancel_btn = ttk.Button(bottom_frame, text="중지", command=on_cancel_click)
-cancel_btn.pack(side="left", padx=5)
-scan_btn = ttk.Button(bottom_frame, text="스캔", command=on_scan_click)
-scan_btn.pack(side="left", padx=5)
-save_btn = ttk.Button(bottom_frame, text="저장", command=on_save_click)
-save_btn.pack(side="left", padx=5)
-
-
-# 메인 루프 실행
-root.mainloop()
-
-stop_event.set()
-current_control_item.join()
+if __name__ == '__main__':
+    root = tk.Tk()
+    m_win = MainWindow(root)    
+    
+    root.mainloop()

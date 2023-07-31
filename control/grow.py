@@ -6,15 +6,16 @@ import pyautogui
 import time
 import pyperclip
 
-class TourAll(ControlBase):
+class Grow(ControlBase):
     
-    con_name = 'TourAll'
+    con_name = '일일미션'
 
     def __init__(self, stop_event):
         super().__init__(stop_event)
         # self.name='모든 서버 보상 얻기'
         # 모든 제어는 최초 화면 상태를 맞추고 시작해야하므로 최초 화면의 상태를 
-        self.start_screen_state = commons.state_dict['타이틀화면']        
+        self.start_screen_state = commons.state_dict['타이틀화면']
+        
 
     def run(self):             
 

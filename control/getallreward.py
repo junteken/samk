@@ -5,6 +5,7 @@ from invalidstateerror import InvalidStateError
 import pyautogui
 import time
 import pyperclip
+import threading
 
 class GetAllReward(ControlBase):
 
@@ -12,17 +13,16 @@ class GetAllReward(ControlBase):
     con_name = '모든 서버 보상 얻기'
 
     def __init__(self, stop_event):
-        super().__init__()
+        super().__init__(stop_event)
         # self.name='모든 서버 보상 얻기'
         # 모든 제어는 최초 화면 상태를 맞추고 시작해야하므로 최초 화면의 상태를 
         self.start_screen_state = commons.state_dict['타이틀화면']
         self.serverlist = None
         self.current_server = None
-        self.current_server_coord = None
-        self.stop_event = stop_event
+        self.current_server_coord = None        
         self.bbox = None
         self.postfix = '빈즈'
-        self.start_server_name = '명월'
+        self.start_server_name = '복소지란'
         self.illegalstr= {'청운지지':'청운빈즈', '천년':'천국빈즈'}
 
     def run(self):
@@ -318,6 +318,9 @@ class GetAllReward(ControlBase):
         # commons.touch_on_text('게임시작')
         commons.mouseclick((1065, 644))
         time.sleep(10)
+
+    def stop(self):
+        self._stop_event.set()
 
         
 
