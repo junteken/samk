@@ -20,7 +20,7 @@ class Coupon(ControlBase):
                             '4aa4913117c956b8',
                             '266f997f6ad53932',
                             '644ff0517177d086']
-        self.start_server_name = '입춘대길'
+        self.start_server_name = '경국지색'
 
     def run(self):             
 
@@ -28,7 +28,7 @@ class Coupon(ControlBase):
         self.serverlist = commons.getserverlist('hb')
         start = self.serverlist[self.start_server_name]
 
-        for idx, sv in enumerate(self.serverlist):
+        for idx, sv in enumerate(self.serverlist):                       
             if self.stop_event.is_set():
                 return                        
             if self.stop_event.is_set():
@@ -62,6 +62,12 @@ class Coupon(ControlBase):
                 time.sleep(2)
                 pyautogui.press('r')
                 time.sleep(1)
+
+            cur_state = self.gamequit()
+            cur_state = commons.get_current_state()
+            cur_state = self.Bt_2_Title(cur_state)
+
+            
 
 
         

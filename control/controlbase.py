@@ -43,12 +43,16 @@ class ControlBase(threading.Thread):
     def Bt_2_Title(self, cur_state):
         if cur_state.name != '블루스택':
             print(f'현재상태 = {cur_state}, 원하는 상태 = 블루스택')
-            return
+            return None
         
         commons.touch_on_text('삼국지K')        
         time.sleep(10)
         pyautogui.press('esc')
         time.sleep(1)
+        cur_state = commons.get_current_state()
+
+        return cur_state
+
 
     # 게임시작 버튼 클릭 후 세계진입까지
     @check_state_none
@@ -57,12 +61,12 @@ class ControlBase(threading.Thread):
         while(cur_state.name != '세상'):
             if retry_cnt > 7:
                 print(f'start2world함수에서 세계로 진입을 하지 못했습니다.')
-                return False
+                return None
             pyautogui.press('esc')
             time.sleep(3)
             cur_state = commons.get_current_state()
             retry_cnt += 1
-        return True
+        return cur_state
     
     def world2event(self, cur_state):
         # 이벤트는 위치가 첫충전이 없어지는 경우를 제외하고는 바뀌지 않음
@@ -77,7 +81,20 @@ class ControlBase(threading.Thread):
             cur_state = commons.get_current_state()
             retry_cnt += 1
         return True
-        
+    
+    def gamequit(self):
+        cur_state = commons.get_current_state()
+
+        while cur_state.name != '게임종료':
+            if self.stop_event.is_set():
+                return
+            pyautogui.press('esc')
+            time.sleep(1)
+            cur_state = commons.get_current_state()
+
+        pyautogui.press('enter')
+        time.sleep(1)
+        return cur_state
         
     def server_start(self, idx):        
         touch_texts = ['서버클리', '시즌서버', 'HB']
