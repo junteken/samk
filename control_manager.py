@@ -2,7 +2,8 @@ import os
 import sys
 import importlib
 from control.getallreward import GetAllReward
-from control.tourall import TourAll
+from control.coupon import Coupon
+
 
 # directory = './control'
 
@@ -20,7 +21,7 @@ from control.tourall import TourAll
 
 control_item=[
     GetAllReward,
-    TourAll
+    Coupon,
 ]
 
 control_dict={}

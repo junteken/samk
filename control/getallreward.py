@@ -4,7 +4,6 @@ from common import commons
 from invalidstateerror import InvalidStateError
 import pyautogui
 import time
-import pyperclip
 import threading
 
 class GetAllReward(ControlBase):
@@ -21,9 +20,10 @@ class GetAllReward(ControlBase):
         self.current_server = None
         self.current_server_coord = None        
         self.bbox = None
-        self.postfix = '빈즈'
-        self.start_server_name = '복소지란'
-        self.illegalstr= {'청운지지':'청운빈즈', '천년':'천국빈즈'}
+        self.postfix = '빈1'
+        self.start_server_name = '환골달태'
+        self.illegalstr= {'청운지지':'청운'+self.postfix,
+                           '천년':'천국'+self.postfix}
 
     def run(self):
         # 처음에는 해당 state가 맞는지 검사해야함        
@@ -43,25 +43,15 @@ class GetAllReward(ControlBase):
             if idx < start:
                 continue
             self.current_server = sv
-            # 초기상태는 타이틀화면 이다.                        
-            touch_texts = ['서버클리', '시즌서버', 'HB']
-            for t in touch_texts:
-                commons.touch_on_text(t)
-                time.sleep(1)
-
-            # 서버가 없다면 scroll해야함
-            # if self.scroll_until_find_server(self.current_server) is False:
-            #     continue            
-            # commons.touch_on_text(self.current_server, self.current_server_coord)
-            # time.sleep(1)
-            commons.selectserver(self.serverlist[self.current_server])
-
+            # 초기상태는 타이틀화면 이다.
+            self.server_start(idx)
+            
             if self.receive_bokji():
                 # 여기 파일로 로깅하는 함수 하나 만들어야됨
                 # 일단은 text view에 출력
                 commons.print_log(f'{sv}서버 복지 수령 완료')
             else:
-                commons.print_log(f'{sv}서버에는 복지가 없었네요')
+                commons.print_log(f'{sv}서버 복지 받기 실패')
 
             time.sleep(1)
             pyautogui.press('esc')
@@ -87,13 +77,8 @@ class GetAllReward(ControlBase):
                     cur_state = commons.get_current_state()
 
             cur_state = commons.get_current_state()
-            if cur_state.name == '블루스택':
-                print('게임종료 확인')
-                commons.touch_on_text('삼국지K')
-                # pyautogui.click(1080, 176)
-                time.sleep(10)
-                pyautogui.press('esc')
-                time.sleep(1)
+            self.Bt_2_Title(cur_state)
+            
 
     # ocr인식 문제로 아래와 같은 알고리즘으로 변경
     # 입춘대길 = 입초대길 로 인식하는 경우 순서와 글자 2개만
@@ -181,10 +166,7 @@ class GetAllReward(ControlBase):
         return False
 
     def receive_bokji(self):
-        print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')
-        # 현재 복지를 받아야할 서버의 타이틀 화면이다.
-        commons.touch_on_text('게임시작')
-        time.sleep(15)
+        print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')        
 
         #시작버튼을 누르면 여러가지 화면으로 바뀐다.
         cur_state = commons.get_current_state()
@@ -192,34 +174,18 @@ class GetAllReward(ControlBase):
         if cur_state.name == '알수없음':
             print('재돌입 후 이름설정화면')
             self.naming()
-        
-        # naming state가 없는 이유는 title과 겹치기때문
-        # elif cur_state.name == '유저이름':
-        #     print('재돌입 후 이름설정화면')
-            # self.naming(self.current_server+'빈즈')
         elif cur_state.name == '국가선택': 
             # 한번도 플레이한적이 없어서 나라부터 고르는 경우
             print('나라선택화면')
-            self.join_country('촉')                        
-        elif cur_state.name == '첫충전':
-            print('첫충전 화면')
-            pass 
+            self.join_country('촉')
 
         cur_state = commons.get_current_state()
 
-        if cur_state.name == '첫충전':
-            pyautogui.press('esc')
-            time.sleep(5) # 첫충전화면을 끄면 기능오픈이 뜰수도 있으므로
-
-        # 여기까지 오면 세계로 진입했는지 확인하면 된다.
-        cur_state = commons.get_current_state()
-        while(cur_state is None or cur_state.name != '세상'):
-            if self.stop_event.is_set():
-                return
-            # 세상이 아니라 기능오픈인경우 나간다
-            pyautogui.press('esc')
-            time.sleep(5)
-            cur_state = commons.get_current_state()
+        if not self.start2world(cur_state):
+            print('세계 상태 진입 실패')
+            return False
+        else:
+            print('세계 진입 성공')
         
         # 일단 image matching은 잘 동작하지 않아 절대좌표로
         # success = commons.touch_on_img('bokji')        
@@ -271,53 +237,7 @@ class GetAllReward(ControlBase):
             
         return False
 
-    # 나라가입은 ocr인식이 잘 되지 않아 상대좌표에 click하는 형태로 구현함
-    def join_country(self, country_name):
-        print(f'{country_name} 나라의 가입을 시작합니다.')        
-        country_list = {"한":(404, 222), "위":(638, 223), "마":(889, 214), '촉':(301, 434), '오':(538, 429), '원':(769, 423)}
-
-        # click으로는 촉나라 아이콘의 가입화면으로 넘어가지 않아
-        # mouse down으로 변경
-        for i in range(3):            
-            pyautogui.mouseDown(country_list[country_name])    
-            time.sleep(0.5)
-            pyautogui.mouseUp(country_list[country_name])
-            
-        # 컨펌화면
-        commons.touch_on_text('가입')
-        time.sleep(1)
-        
-        if self.current_server[0] == 'S':
-            self.naming()
-        else:
-            self.naming()
-
-    # naming화면은 ocr결과가 좋지 않으므로 절대좌표로 박음
-    def naming(self):
-        # pyautogui.click(1051, 543, duration=0.5)
-        commons.mouseclick((1051,543))
-        time.sleep(1)
-
-        # 이름 입력창뜨고
-        for i in range(10):
-            pyautogui.press('backspace')
-
-        time.sleep(1)
-        # 청운지지 서버의 경우 불법문자로 인식됨.
-        if self.current_server in self.illegalstr:
-            user_name = self.illegalstr[self.current_server]
-        elif self.current_server[0] == 'S':
-            user_name = self.current_server[2:] + self.postfix
-        else:
-            user_name = self.current_server + self.postfix
-            
-        pyperclip.copy(user_name)        
-        pyautogui.hotkey('ctrl', 'v')
-        time.sleep(1)
-        pyautogui.press('enter')
-        # commons.touch_on_text('게임시작')
-        commons.mouseclick((1065, 644))
-        time.sleep(10)
+    
 
     def stop(self):
         self._stop_event.set()

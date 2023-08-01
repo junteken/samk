@@ -22,12 +22,24 @@ class MainWindow(tk.Frame):
         tk.Frame.__init__(self, parent, *args, **kwargs)
         self.parent = parent
         self.current_control_item = None
+        screen_width = parent.winfo_screenwidth()
+        screen_height = parent.winfo_screenheight()
+        # 창 크기 설정 (원하는 창 크기로 변경)
+        self.window_width = 1000
+        self.window_height = 1000
+        # 창 위치 계산 (우측 상단)
+        x = screen_width - self.window_width
+        y = 0
+        # 창 크기 및 위치 설정
+        parent.geometry(f'{self.window_width}x{self.window_height}+{x}+{y}')
+        s = ttk.Style()
+        s.configure('Treeview', rowheight=30) # repace 40 with whatever you need
         self.create_widgets()
         for item in control_manager.control_item:
             self.list_view.insert('', 'end', text=item.con_name)
         commons.bsm.fn_update_imageview = self.update_image
         self.stop_event = None
-
+        
         parent.protocol("WM_DELETE_WINDOW", self.on_closing)
 
     def create_widgets(self):
@@ -44,7 +56,9 @@ class MainWindow(tk.Frame):
         bottom_frame.pack(side="bottom", padx=5, pady=10, fill="x")
 
         # 리스트뷰 생성
-        self.list_view = ttk.Treeview(left_frame, selectmode='browse')
+        self.list_view = ttk.Treeview(left_frame,
+                                    #   height=self.window_height*.2,                                       
+                                         selectmode='browse')
         self.list_view.bind('<<TreeviewSelect>>', self.get_selected_item_text)
         self.list_view.pack(fill="both", expand=True)
 
@@ -94,8 +108,9 @@ class MainWindow(tk.Frame):
         self.current_control_item(self.stop_event).start()
 
     def on_cancel_click(self):
-        if self.current_control_item is not None:
-            self.current_control_item.stop_event.set()        
+        if self.stop_event is not None:
+            self.stop_event.set()
+        self.start_btn.config(state='enabled')
 
     def on_scan_click(self):
         _, ocr_text = commons.get_current_text()
@@ -104,7 +119,7 @@ class MainWindow(tk.Frame):
         self.text_view.insert('end', ocr_text)
         self.text_view.insert('end', "'\n'")
 
-    def on_save_click():
+    def on_save_click(self):
         bbox, img = commons.bsm.get_CurrentBsImg()
         file_name = filedialog.asksaveasfilename(defaultextension=".png", 
                                                     filetypes=[("PNG files", "*.png"), ("All files", "*.*")])
@@ -128,7 +143,8 @@ class MainWindow(tk.Frame):
         print(f"Relative coordinates: ({x}, {y})")
 
     def on_closing(self):
-        self.stop_event.set()
+        if self.stop_event is not None:
+            self.stop_event.set()
         self.parent.destroy()
 
 if __name__ == '__main__':

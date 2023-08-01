@@ -35,11 +35,10 @@ class Grow(ControlBase):
                 continue
             self.current_server = sv
             # 초기상태는 타이틀화면 이다.                        
-            touch_texts = ['서버클리', '시즌서버', 'HB']
-            for t in touch_texts:
-                commons.touch_on_text(t)
-                time.sleep(1)
-
-            
+            self.server_start(idx)
+            #시작버튼을 누르면 여러가지 화면으로 바뀐다.
+            cur_state = commons.get_current_state()
+            self.start2world(cur_state)
+    
         
         

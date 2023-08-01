@@ -107,11 +107,12 @@ def get_current_state():
         _, texts = get_current_text()
         for state in state_instances:
             if state.check(texts):
+                print(f'현재상태는 = {state.name}')
                 return state
         loop = loop + 1
             
         time.sleep(0.5)
-        
+    print('알수없는 상태')        
     return state_dict['알수없음']
 
 def get_current_text():
@@ -266,6 +267,11 @@ def scroll_pgdwn(count):
         # pyautogui.drag(10, 0, 2, button='left')
         # time.sleep(1)
 
+def scroll(start, end, duration=2):
+    pyautogui.moveTo(start[0], start[1])
+    pyautogui.dragTo(end[0], end[1], duration, pyautogui.easeOutQuad, button='left')
+
+
 def selectserver(index):
     # 8로 나누어 몫과 나머지를 구한다.
     quotient = index // 16
@@ -283,4 +289,6 @@ def selectserver(index):
     time.sleep(1)
 
 
-    
+def your_function():
+    current_function_name = inspect.currentframe().f_code.co_name
+    print("Debug: Function Name =", current_function_name)

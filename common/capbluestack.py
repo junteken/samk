@@ -4,7 +4,7 @@ from PIL import ImageGrab
 import win32gui
 import win32con
 from common import commons
-
+import time
 '''
 window api를 이용해 bluestack process정보를 기반으로 window정보를 가져오는 역할 수행
 '''
@@ -31,10 +31,25 @@ class CapBlueStack(object):
             return
         
         # win32gui.SetWindowPos(window_handle, win32con.HWND_TOPMOST, 0, 0, 1280, 720,  win32con.SWP_SHOWWINDOW)
+        rect = win32gui.GetWindowRect(window_handle)
+        # n_retries = 0
+        # if rect[3] == 720:
+        #     pass
+        # else:
+        #     while(n_retries < 5):
+        #         win32gui.SetWindowPos(window_handle, win32con.HWND_TOPMOST, 0, 0, 1280, 720,  win32con.SWP_SHOWWINDOW)
+        #         rect = win32gui.GetWindowRect(window_handle)
+        #         if rect[3] == 720:
+        #             break
+        #         n_retries += 1
+        #         time.sleep(0.1)
 
-        rect = win32gui.GetWindowRect(window_handle)        
-        x, y = rect[0], rect[1]
+        # if n_retries >= 5:
+        #     print(f'{rect[3]} 크기 오류, 창크기 조절 실패')
+        #     return False
+        x, y = rect[0], rect[1]    
         print(f'{commons.window_name}의 시작좌표는 {x}, {y}, width={rect[2]}, height={rect[3]}')
+        return True
         
         
     def get_window_rect(self, idx):
