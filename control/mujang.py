@@ -30,6 +30,8 @@ class Mujang(ControlBase):
                 continue
             self.current_server = sv
 
+            print(f'{self.current_server} 서버의 무장셋팅 시작합니다.')            
+
             self.server_start(idx)
             cur_state = commons.get_current_state()
             cur_state = self.start2world(cur_state)

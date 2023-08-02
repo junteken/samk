@@ -105,15 +105,15 @@ class ControlBase(threading.Thread):
     def gamequit(self):
         cur_state = commons.get_current_state()
 
-        while cur_state.name != '게임종료':
-            if self.stop_event.is_set():
-                return None
-            pyautogui.press('esc')
+        while cur_state.name != '블루스택':
+            while cur_state.name != '게임종료':            
+                pyautogui.press('esc')
+                time.sleep(1)
+                cur_state = commons.get_current_state()
+
+            pyautogui.press('enter')        
             time.sleep(1)
             cur_state = commons.get_current_state()
-
-        pyautogui.press('enter')
-        time.sleep(1)
         return cur_state
         
     def server_start(self, idx):        
