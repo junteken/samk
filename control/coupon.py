@@ -20,7 +20,7 @@ class Coupon(ControlBase):
                             '4aa4913117c956b8',
                             '266f997f6ad53932',
                             '644ff0517177d086']
-        self.start_server_name = '경국지색'
+        self.start_server_name = '의기투합'
 
     def run(self):             
 

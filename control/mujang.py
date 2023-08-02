@@ -6,9 +6,9 @@ import pyautogui
 import time
 import pyperclip
 
-class Grow(ControlBase):
+class Mujang(ControlBase):
     
-    con_name = '일일미션'
+    con_name = '무장배치'
 
     def __init__(self, stop_event):
         super().__init__(stop_event)        
@@ -17,14 +17,7 @@ class Grow(ControlBase):
         self.target_server_name = '입춘대길'
 
     def run(self):
-        # 처음에는 해당 state가 맞는지 검사해야함        
-        chk_state = self.check()
-        if chk_state is False:
-            print(f'{Grow.con_name} 자동화를 시작하기위한 초기 상태가 아닙니다.')
-            return
-        
-        print('초기상태 일치 확인완료')
-        # 탐색할 서버의 txt파일이름을 아래에 넣어준다.
+        # HB서버 리스트 화면까지 왔음
         self.serverlist = commons.getserverlist('hb')
         start = self.serverlist[self.start_server_name]
 
@@ -40,7 +33,15 @@ class Grow(ControlBase):
             self.server_start(idx)
             cur_state = commons.get_current_state()
             cur_state = self.start2world(cur_state)
+            
+            cur_state = self.world2chulmujang(cur_state)
 
+
+
+
+
+
+            # 항상 게임재시작해줘야함
             self.restart_game()
 
     

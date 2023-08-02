@@ -75,19 +75,39 @@ class ControlBase(threading.Thread):
         while(cur_state.name != '이벤트'):
             if retry_cnt > 7:
                 print(f'world2event함수에서 이벤트로 진입을 하지 못했습니다.')
-                return False
+                return None
             commons.mouseclick(event_coord)
             time.sleep(2)
             cur_state = commons.get_current_state()
             retry_cnt += 1
-        return True
+        return cur_state
+    
+    def high_gacha(self):
+        pyautogui.hotkey('ctrl', 'shift', '1')
+    
+    def restart_game(self):
+        cur_state = self.gamequit()
+        self.Bt_2_Title(cur_state)
+
+    def world2chulmujang(self, cur_state):
+        retry_cnt = 0
+        while(cur_state.name != '출전무장'):
+            if retry_cnt > 7:
+                print(f'world2chulmujang함수에서 이벤트로 진입을 하지 못했습니다.')
+                return None
+            pyautogui.press('w')
+            time.sleep(2)
+            cur_state = commons.get_current_state()
+            retry_cnt += 1
+        return cur_state
+
     
     def gamequit(self):
         cur_state = commons.get_current_state()
 
         while cur_state.name != '게임종료':
             if self.stop_event.is_set():
-                return
+                return None
             pyautogui.press('esc')
             time.sleep(1)
             cur_state = commons.get_current_state()
