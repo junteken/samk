@@ -3,7 +3,7 @@ import sys
 import importlib
 from control.getallreward import GetAllReward
 from control.coupon import Coupon
-
+from control.mujang import Mujang
 
 # directory = './control'
 
@@ -22,6 +22,7 @@ from control.coupon import Coupon
 control_item=[
     GetAllReward,
     Coupon,
+    Mujang,
 ]
 
 control_dict={}

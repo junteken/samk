@@ -141,30 +141,8 @@ class GetAllReward(ControlBase):
                 print(f'{str1} 과 유사하다고 검색되는건 {str2}')
             return False
         else:
-            return self.is_included_threshold(str1, str2)
-
-
-    # target의 글자가 str1에 
-    def is_included_threshold(self, str1, str2):
-        str1_len = len(str1)
-        str2_len = len(str2)
-        threshold = str1_len * 0.5
-
-        for i in range(str2_len - str1_len + 1):
-            matching_count = 0        
-            for a, b in zip(str1, str2[i:i+str1_len]):
-                # 인식되는 공백이 있을수도 있는데
-                # 서버명들은 공백이 없는걸로 txt파일에 넣었으므로
-                if b == ' ' or b == '[' or b == ']':
-                    continue
-                if a == b:
-                    matching_count += 1            
-            if matching_count >= threshold:
-                print(f'찾을문자열 = {str1}, 대상문자열 = {str2[i:i+str1_len]} 찾음')
-                return True
-        
-        return False
-
+            return commons.is_included_threshold(str1, str2)
+    
     def receive_bokji(self):
         print(f'{self.current_server} 서버의 복지 받기가 시작되었습니다.')        
 

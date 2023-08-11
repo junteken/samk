@@ -20,7 +20,7 @@ class Coupon(ControlBase):
                             '4aa4913117c956b8',
                             '266f997f6ad53932',
                             '644ff0517177d086']
-        self.start_server_name = '의기투합'
+        self.start_server_name = 'S 109'
 
     def run(self):             
 
@@ -38,6 +38,7 @@ class Coupon(ControlBase):
             self.current_server = sv
 
             self.server_start(idx)
+            print(f'{self.current_server} 서버의 쿠폰 받기가 시작되었습니다.') 
             cur_state = commons.get_current_state()
             self.start2world(cur_state)
             self.world2event(cur_state)

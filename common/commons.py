@@ -9,6 +9,7 @@ import pyautogui
 import cv2
 import numpy as np
 import time
+import hgtk
 
 g_reader = easyocr.Reader(['ko', 'en'], gpu=True)
 
@@ -128,6 +129,27 @@ def moveTo_mouse(coord):
 def mouseclick(coord):
     pyautogui.click(bsm.current_bsBbox[0]+coord[0], 
                      bsm.current_bsBbox[1]+coord[1])
+
+# 자모음 단위로 분리해 문자열의 유사도를 측정    
+def search_all_similar_texts_on_cur_screen(keyword):
+    if len(keyword) < 3:
+        print('찾으려는 문자열이 너무 짧습니다.')
+        return None
+    
+    keyword_jamo = hgtk.text.decompose(keyword)
+    ocr_result, _ = get_current_text()
+    found = []
+    for _, v in enumerate(ocr_result):
+        # keyword보다 작은 
+        if (len(keyword) - 1) > len(v[1]):
+            continue
+        jamo = hgtk.text.decompose(v[1])
+        t = difflib.SequenceMatcher(None, jamo, keyword_jamo).ratio()
+        if t > 0.67:
+            found.append(v)
+
+    return found
+    
 # 인자로 주어진 text영역을 터지하는 함수
 # 동일한 text가 없다면 가장 유사한 문자의 첫번째 인자를 터치
 def touch_on_text(text, coord=None):

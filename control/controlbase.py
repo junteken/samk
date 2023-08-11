@@ -82,8 +82,27 @@ class ControlBase(threading.Thread):
             retry_cnt += 1
         return cur_state
     
-    def high_gacha(self):
-        pyautogui.hotkey('ctrl', 'shift', '1')
+    def high_gacha(self, cur_state, cnt = -1):
+        # pyautogui.hotkey('ctrl', 'shift', '1')
+        while(cur_state.name != '무장모집'):
+            pyautogui.press('a')
+            time.sleep(2)
+            pyautogui.press('enter')
+            time.sleep(2)
+            pyautogui.press('esc')
+            time.sleep(2)
+            cnt += 1
+            print(f'{cnt}번째 무장모집중')
+            if cnt > 100:
+                print(f'무장모집리밋 도달 {cnt}')
+                cur_state = commons.get_current_state()
+                return cur_state
+            cur_state = commons.get_current_state()
+
+        print('고급무장 모집 완료')
+        pyautogui.press('esc')
+        time.sleep(1)
+        return cur_state
     
     def restart_game(self):
         cur_state = self.gamequit()
@@ -93,14 +112,13 @@ class ControlBase(threading.Thread):
         retry_cnt = 0
         while(cur_state.name != '출전무장'):
             if retry_cnt > 7:
-                print(f'world2chulmujang함수에서 이벤트로 진입을 하지 못했습니다.')
+                print(f'world2chulmujang 상태변이실패')
                 return None
             pyautogui.press('w')
             time.sleep(2)
             cur_state = commons.get_current_state()
             retry_cnt += 1
         return cur_state
-
     
     def gamequit(self):
         cur_state = commons.get_current_state()
